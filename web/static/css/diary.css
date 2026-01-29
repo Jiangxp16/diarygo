@@ -1,0 +1,106 @@
+/* ========= 通用 ========= */
+#tw-content td {
+    vertical-align: top;
+    white-space: pre-wrap;      /* 关键：保留换行 */
+    word-break: break-word;
+    line-height: 1.4;
+}
+
+.button-container {
+    display: flex;
+    flex-direction: row;
+}
+
+/* ========= Daily View ========= */
+.daily-cell {
+    min-height: 360px;
+    height: auto;
+    padding: 12px;
+    font-size: 20px;
+    text-align: left;
+}
+
+/* 用 div 模拟 textarea */
+.daily-editor {
+    min-height: 360px;
+    width: 100%;
+    outline: none;
+    border: none;
+    white-space: pre-wrap;
+}
+
+.daily-header {
+    padding: 6px;
+}
+
+.daily-date-solar{
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.daily-date-lunar{
+    font-size: 12px;
+    color: #888;
+    margin-top: 2px;
+}
+
+
+/* ========= Monthly View ========= */
+.month-cell {
+    vertical-align: top;
+    padding: 4px;
+    height: 150px;
+    position: relative;
+}
+
+.cell-date {
+    font-size: 15px;
+    color: #666;
+    background-color: #cdcaca;
+    padding: 2px 4px;
+    text-align: left;
+    margin-bottom: 2px;
+    border-bottom: 1px solid #b0aaaa;
+    user-select: none;
+}
+
+.cell-content {
+    flex: 1 1 auto;
+    text-align: left;
+    min-height: 135px;
+    max-height: 135px;
+    font-size: 20px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    outline: none;
+}
+.cell-content:empty::before {
+    content: " ";
+    white-space: pre;
+}
+
+.month-disabled {
+    background-color: #ece9e9;
+    color: #aaa;
+}
+
+.month-date-solar{
+    font-size: 16px;
+    font-weight: bold;
+}
+.month-date-lunar{
+    font-size: 12px;
+    color: #888;
+    margin-top: 2px;
+}
+#tw-content {
+    table-layout: fixed;
+    width: 100%;
+}
+
+#tw-content th,
+#tw-content td {
+    width: calc(100% / 7);
+    padding: 0;
+}

@@ -1,0 +1,61 @@
+{{define "title"}}{{ t "Note" }}{{end}}
+
+{{define "extra-head"}}
+<link rel="stylesheet" href="/static/css/table.css">
+<link rel="stylesheet" href="/static/css/note.css">
+{{end}}
+
+{{define "content"}}
+
+<!-- 顶部操作区 -->
+<div class="d-flex align-items-center mb-3 gap-2">
+    <div class="ms-auto"></div>
+    <select id="flag-select" class="form-select form-select-sm" style="width:120px;">
+        <option value="0">{{ t "All" }}</option>
+        <option value="1">{{ t "TO DO" }}</option>
+        <option value="2">{{ t "Done" }}</option>
+    </select>
+</div>
+
+<!-- 笔记表格 -->
+<div class="table-container">
+    <table class="table table-sm table-bordered" id="note-table">
+        <thead class="table-light">
+            <tr>
+                <th style="display:none">ID</th>
+                <th class="sortable th-center" data-key="begin">{{ t "Begin" }}</th>
+                <th class="sortable th-center" data-key="last">{{ t "Last" }}</th>
+                <th class="sortable th-center" data-key="process">{{ t "Process" }}</th>
+                <th class="sortable th-center" data-key="desire">{{ t "Desire" }}</th>
+                <th class="sortable th-center" data-key="priority">{{ t "Priority" }}</th>
+                <th class="sortable th-center" data-key="content">{{ t "Content" }}</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+
+<!-- 表格下方操作行 -->
+<div class="d-flex justify-content-between align-items-center">
+    <!-- 左下：导入导出 -->
+    <div class="d-flex gap-2">
+        <button id="btn-import" class="btn btn-sm btn-info">{{ t "Import" }}</button>
+        <button id="btn-export" class="btn btn-sm btn-warning">{{ t "Export" }}</button>
+        <input type="file" id="importFile" accept=".xlsx" hidden>
+    </div>
+
+    <!-- 右下：过滤 + 添加删除 -->
+    <div class="d-flex gap-2">
+        <input type="text" id="filter" class="form-control form-control-sm" style="width:180px;" placeholder="{{ t "Search..." }}">
+        <button id="btn-add" class="btn btn-sm btn-success">{{ t "Add" }}</button>
+        <button id="btn-del" class="btn btn-sm btn-danger">{{ t "Del" }}</button>
+    </div>
+</div>
+
+{{end}}
+
+{{define "extra-scripts"}}
+<script src="/static/js/core/table.js"></script>
+<script src="/static/js/note.js"></script>
+{{end}}

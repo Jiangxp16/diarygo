@@ -1,0 +1,14 @@
+{{define "navbar"}}
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <a class="navbar-brand" href="/config">DiaryGo</a>
+  <div class="collapse navbar-collapse">
+    <ul class="navbar-nav me-auto">
+      <li class="nav-item" id="nav-diary"><a class="nav-link" href="/diary">{{ t "Diary" }}</a></li>
+      <li class="nav-item" id="nav-bill"><a class="nav-link" href="/bill">{{ t "Bill" }}</a></li>
+      <li class="nav-item" id="nav-interest"><a class="nav-link" href="/interest">{{ t "Interest" }}</a></li>
+      <li class="nav-item" id="nav-note"><a class="nav-link" href="/note">{{ t "Note" }}</a></li>
+    </ul>
+    <a class="btn btn-outline-light" href="/logout">{{ t "Logout" }}</a>
+  </div>
+</nav>
+{{end}}

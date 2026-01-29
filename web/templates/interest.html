@@ -1,0 +1,58 @@
+{{define "title"}}{{ t "Interest" }}{{end}}
+
+{{define "extra-head"}}
+<link rel="stylesheet" href="/static/css/interest.css">
+<link rel="stylesheet" href="/static/css/table.css">
+{{end}}
+
+{{define "content"}}
+
+<!-- 顶部控制区 -->
+<div class="d-flex align-items-center mb-3 gap-2">
+    <div class="ms-auto"></div>
+    <select id="sort-select" class="form-select form-select-sm" style="width:160px;"></select>
+</div>
+
+<!-- 表格 -->
+<div class="table-container">
+    <table class="table table-sm table-bordered" id="interest-table">
+        <thead class="table-light">
+            <tr>
+                <th style="display:none">ID</th>
+                <th class="sortable th-center" data-key="added">{{ t "Added" }}</th>
+                <th class="sortable" data-key="name">{{ t "Name" }}</th>
+                <th class="sortable th-center" data-key="sort">{{ t "Sort" }}</th>
+                <th class="sortable th-center" data-key="progress">{{ t "Prog" }}</th>
+                <th class="sortable th-center" data-key="publish">{{ t "Pub" }}</th>
+                <th class="sortable th-center" data-key="date">{{ t "Last" }}</th>
+                <th class="sortable th-center" data-key="score_db">{{ t "Score(db)" }}</th>
+                <th class="sortable th-center" data-key="score_imdb">{{ t "Score(imdb)" }}</th>
+                <th class="sortable th-center" data-key="score">{{ t "Score" }}</th>
+                <th class="sortable" data-key="remark">{{ t "Remark" }}</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<!-- 底部操作 -->
+<div class="d-flex justify-content-between mt-2">
+    <div class="d-flex gap-2">
+        <button id="btn-import" class="btn btn-sm btn-info">{{ t "Import" }}</button>
+        <button id="btn-export" class="btn btn-sm btn-warning">{{ t "Export" }}</button>
+        <input type="file" id="importFile" accept=".xlsx" hidden>
+    </div>
+
+    <div class="d-flex gap-2">
+        <input type="text" id="filter" class="form-control form-control-sm"
+               style="width:200px;" placeholder="{{ t "Search..." }}">
+        <button id="btn-add" class="btn btn-sm btn-success">{{ t "Add" }}</button>
+        <button id="btn-del" class="btn btn-sm btn-danger">{{ t "Del" }}</button>
+    </div>
+</div>
+
+{{end}}
+
+{{define "extra-scripts"}}
+<script src="/static/js/interest.js"></script>
+{{end}}

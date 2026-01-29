@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  diarygo:
+    build: .
+    container_name: diarygo_app
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config:/app/config    # 宿主机 config 目录挂载
+      - ./data:/app/data        # 宿主机 data 目录挂载
+    environment:
+      - APP_PORT=8080
+      - GIN_MODE=release
+    restart: unless-stopped

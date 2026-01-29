@@ -1,0 +1,43 @@
+/* 表单容器 */
+.config-form {
+    max-width: 500px;      /* 表单最大宽度，可根据需要调整 */
+}
+
+/* 统一行间距和对齐 */
+.config-form .form-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    gap: 12px;
+}
+
+.config-form .form-row label {
+    flex: 0 0 200px;        /* 不拉伸 */
+    min-width: 130px;      /* 标签最小宽度 */
+    margin-bottom: 0;
+}
+
+.config-form .form-row input.form-control,
+.config-form .form-row select.form-select {
+    flex: 1 1 auto;       /* 最小宽度 200px，可伸缩但不拉满 */
+    max-width: 280px;      /* 限制最大宽度，避免拉满整行 */
+}
+
+/* checkbox 对齐 */
+.config-form .form-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 0.75rem;
+}
+
+/* 标题间距 */
+.config-form h5 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+/* 按钮 */
+.config-form button {
+    display: inline-block;
+}

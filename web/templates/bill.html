@@ -1,0 +1,62 @@
+{{define "title"}}{{ t "Bill" }}{{end}}
+
+{{define "extra-head"}}
+<link rel="stylesheet" href="/static/css/bill.css">
+<link rel="stylesheet" href="/static/css/table.css">
+{{end}}
+
+{{define "content"}}
+
+<!-- 日期控制区 -->
+<!-- 日期控制 + 收支统计 -->
+<div class="d-flex align-items-center mb-3 gap-2">
+    <input type="month" id="month-picker" class="form-control form-control-sm" style="width:180px;">
+    <input type="date" id="date-start" class="form-control form-control-sm" style="width:160px;">
+    <input type="date" id="date-end" class="form-control form-control-sm" style="width:160px;">
+
+    <div class="ms-auto d-flex gap-3">
+        <div>{{ t "Total" }}: <span id="total">0</span></div>
+        <div>{{ t "In" }}: <span id="total-in">0</span></div>
+        <div>{{ t "Out" }}: <span id="total-out">0</span></div>
+    </div>
+</div>
+
+<!-- 账单表 -->
+<div class="table-container">
+    <table class="table table-sm table-bordered" id="bill-table">
+        <thead class="table-light">
+            <tr>
+            <th style="display:none">ID</th>
+            <th class="sortable th-center" data-key="date">{{ t "Date" }}</th>
+            <th class="sortable th-center" data-key="inout">{{ t "Inout" }}</th>
+            <th class="sortable th-center" data-key="type">{{ t "Type" }}</th>
+            <th class="sortable th-center" data-key="amount">{{ t "Amount" }}</th>
+            <th class="sortable" data-key="item">{{ t "Item" }}</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<!-- 表格下方操作行 -->
+<div class="d-flex justify-content-between align-items-center">
+    <!-- 左下：导入导出 -->
+    <div class="d-flex gap-2">
+        <button id="btn-import" class="btn btn-sm btn-info">{{ t "Import" }}</button>
+        <button id="btn-export" class="btn btn-sm btn-warning">{{ t "Export" }}</button>
+        <input type="file" id="importFile" accept=".xlsx" hidden>
+    </div>
+
+    <!-- 右下：过滤 + 添加删除 -->
+    <div class="d-flex gap-2">
+        <input type="text" id="filter" class="form-control form-control-sm" style="width:180px;" placeholder="{{ t "Search..." }}">
+        <button id="btn-add" class="btn btn-sm btn-success">{{ t "Add" }}</button>
+        <button id="btn-del" class="btn btn-sm btn-danger">{{ t "Del" }}</button>
+    </div>
+</div>
+
+{{end}}
+
+{{define "extra-scripts"}}
+<script src="/static/js/bill.js"></script>
+{{end}}

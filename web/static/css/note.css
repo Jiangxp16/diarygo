@@ -1,0 +1,11 @@
+.table-container th,
+.table-container td {
+  white-space: normal;      /* 允许换行 */
+  word-break: break-word;   /* 长单词/英文/URL 断行 */
+  overflow-wrap: anywhere;  /* 兜底 */
+  text-overflow: unset;
+}
+
+.td-content {
+    white-space: pre-wrap; /* 保留空格和换行 */
+}

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<script src="/static/js/imp/jquery-3.7.1.min.js"></script>
+<script src="/static/js/imp/bootstrap.bundle.min.js"></script>
+{{ block "i18n" . }}{{ end }}
+<head>
+    <meta charset="UTF-8">
+    <title>{{ block "title" . }}{{ t "DiaryGo" }}{{ end }}</title>
+    <link href="/static/js/imp/bootstrap.min.css" rel="stylesheet">
+    <link id="favicon" rel="icon" href="/static/imgs/logo.png" type="image/png" sizes="32x32">
+    {{ block "extra-head" . }}{{ end }}  <!-- 子页面可插入额外 CSS/JS -->
+    <style>
+        body {
+            font-family: "Helvetica Neue", Arial, sans-serif;
+            /* 可以加 font-weight, line-height 等全局属性 */
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+    <!-- 共享的导航栏 -->
+    {{ template "navbar" . }}
+
+    <!-- 页面主要内容区域（子页面填充这里） -->
+    <div class="container-fluid mt-4 px-4">
+        {{ block "content" . }}{{ end }}
+    </div>
+
+    <!-- 全局 info-box（放在 body 末尾） -->
+    <div id="info-box"
+         class="alert alert-danger position-fixed top-0 start-50 translate-middle-x mt-3 d-none"
+         style="z-index: 2000; min-width: 400px; text-align: center;">
+    </div>
+    <div class="modal fade" id="confirmModal" tabindex="-1">
+        <div class="modal-dialog modal-sm modal-dialog-centered" style="min-width: 400px;">
+            <div class="modal-content">
+            <div class="modal-body text-center">
+                <p id="confirm-message" class="mb-3"></p>
+                <div class="d-flex justify-content-center gap-2">
+                <button type="button" class="btn btn-sm btn-secondary" id="confirm-no">{{ t "Cancel"}}</button>
+                <button type="button" class="btn btn-sm btn-danger" id="confirm-yes">{{ t "OK" }}</button>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+<script src="/static/js/conf.js"></script>
+<script src="/static/js/core/ui.js"></script>
+<script src="/static/js/core/api.js"></script>
+<script src="/static/js/core/table.js"></script>
+{{ block "extra-scripts" . }}{{ end }}  <!-- 子页面可插入额外 JS -->
+<script>
+    if (window.APP_CONFIG?.logo) {
+        document.getElementById('favicon').href = window.APP_CONFIG.logo;
+    }
+    if (window.APP_CONFIG?.font) {
+        document.body.style.fontFamily = window.APP_CONFIG.font;
+    }
+</script>
+</html>

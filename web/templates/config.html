@@ -1,0 +1,106 @@
+{{define "title"}}DiaryGo{{end}}
+
+
+{{define "extra-head"}}
+<link rel="stylesheet" href="/static/css/config.css">
+{{end}}
+
+{{define "content"}}
+
+<h1>{{ t "DIARYGO CONFIGURATION" }}</h1>
+
+<form id="settingsForm" class="mt-4 config-form">
+
+  <!-- General -->
+  <h5>{{ t "General" }}</h5>
+
+  <div class="form-row">
+    <label class="form-label">{{ t "Language" }}</label>
+    <select id="cfg-language" class="form-select form-select-sm">
+      <option value="en">Default</option>
+      <option value="zh">中文</option>
+    </select>
+  </div>
+
+  <div class="form-row">
+    <label class="form-label">{{ t "First day of week" }}</label>
+    <select id="cfg-first_day_of_week" class="form-select form-select-sm">
+      <option value="1">{{ t "Monday" }}</option>
+      <option value="0">{{ t "Sunday" }}</option>
+    </select>
+  </div>
+
+  <div class="form-row">
+    <label class="form-label">{{ t "Location" }}</label>
+    <input type="text" id="cfg-location" class="form-control form-control-sm">
+  </div>
+
+  <div class="form-check form-row">
+    <input class="form-check-input" type="checkbox" id="cfg-show_lunar">
+    <label class="form-check-label">{{ t "Show lunar calendar" }}</label>
+  </div>
+
+  <!-- Modules -->
+  <h5 class="mt-4">{{ t "Modules" }}</h5>
+
+  <div class="form-row">
+    <label class="form-label">{{ t "Default UI" }}</label>
+    <select id="cfg-ui_default" class="form-select form-select-sm">
+      <option value="config">{{ t "Config" }}</option>
+      <option value="diary">{{ t "Diary" }}</option>
+      <option value="bill">{{ t "Bill" }}</option>
+      <option value="interest">{{ t "Interest" }}</option>
+      <option value="note">{{ t "Note" }}</option>
+    </select>
+  </div>
+
+  <div class="form-check form-row">
+    <input class="form-check-input" type="checkbox" id="cfg-show_bill">
+    <label class="form-check-label">{{ t "Enable Bill" }}</label>
+  </div>
+
+  <div class="form-check form-row">
+    <input class="form-check-input" type="checkbox" id="cfg-show_interest">
+    <label class="form-check-label">{{ t "Enable Interest" }}</label>
+  </div>
+
+  <div class="form-check form-row">
+    <input class="form-check-input" type="checkbox" id="cfg-show_note">
+    <label class="form-check-label">{{ t "Enable Note" }}</label>
+  </div>
+
+  <button type="submit" class="btn btn-primary btn-sm mt-3">
+    {{ t "Save All Settings" }}
+  </button>
+</form>
+
+<hr class="my-4">
+
+<!-- Security -->
+<h5>{{ t "Security" }}</h5>
+
+<form id="passwordForm" class="mt-3 config-form">
+  <div class="form-row">
+    <label class="form-label">{{ t "Current Password" }}</label>
+    <input type="password" id="pwd-old" class="form-control form-control-sm">
+  </div>
+
+  <div class="form-row">
+    <label class="form-label">{{ t "New Password" }}</label>
+    <input type="password" id="pwd-new" class="form-control form-control-sm">
+  </div>
+
+  <div class="form-row">
+    <label class="form-label">{{ t "Confirm Password" }}</label>
+    <input type="password" id="pwd-confirm" class="form-control form-control-sm">
+  </div>
+
+  <button type="submit" class="btn btn-warning btn-sm mt-2">
+    {{ t "Change Password" }}
+  </button>
+</form>
+{{end}}
+
+{{define "extra-scripts"}}
+<script src="/static/js/config.js"></script>
+{{end}}
