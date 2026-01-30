@@ -45,3 +45,7 @@ func (r *Repository) Add(n *Note) (*Note, error) {
 	}
 	return r.BaseRepository.Add(n)
 }
+
+func (r *Repository) List() ([]*Note, error) {
+	return r.GetList("ORDER BY begin DESC")
+}

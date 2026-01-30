@@ -34,3 +34,7 @@ func (r *Repository) Add(n *Sport) (*Sport, error) {
 	}
 	return r.BaseRepository.Add(n)
 }
+
+func (r *Repository) List() ([]*Sport, error) {
+	return r.GetList("ORDER BY date DESC")
+}

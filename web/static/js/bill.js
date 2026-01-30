@@ -155,7 +155,7 @@ $('#date-start').change(() => {
 });
 
 $('#date-end').change(() => {
-  state.start = $('#date-end').val();
+  state.end = $('#date-end').val();
   loadBills();
 });
 
