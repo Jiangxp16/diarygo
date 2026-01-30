@@ -5,7 +5,6 @@ import (
 	"diarygo/internal/utils"
 )
 
-// Note 模型
 type Note struct {
 	ID       int    `json:"id"`
 	Begin    int    `json:"begin"`
@@ -32,14 +31,17 @@ type Repository struct {
 	*db.BaseRepository[Note]
 }
 
-// NewRepository 初始化表
 func NewRepository(d *db.DB) *Repository {
 	base := db.NewBaseRepository[Note](d, TABLE, SQLCreate, "")
 	return &Repository{BaseRepository: base}
 }
 
-func (r *Repository) Add(n *Note) (*Note,error) {
-	if n.Begin == 0 { n.Begin = utils.GetCurrentDateInt() }
-	if n.Last == 0 { n.Last = utils.GetCurrentDateInt() }
+func (r *Repository) Add(n *Note) (*Note, error) {
+	if n.Begin == 0 {
+		n.Begin = utils.GetCurrentDateInt()
+	}
+	if n.Last == 0 {
+		n.Last = utils.GetCurrentDateInt()
+	}
 	return r.BaseRepository.Add(n)
 }

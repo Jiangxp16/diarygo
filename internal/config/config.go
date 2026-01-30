@@ -46,6 +46,7 @@ var defaultConfig = map[string]map[string]string{
 		"show_bill":         "1",
 		"show_note":         "1",
 		"show_interest":     "1",
+		"show_sport":        "1",
 		"password":          "",
 		"ui_default":        "diary",
 	},
@@ -80,6 +81,9 @@ var editableConfig = map[string]map[string]ConfigRule{
 			AllowedValues: []string{"0", "1"},
 		},
 		"show_interest": {
+			AllowedValues: []string{"0", "1"},
+		},
+		"show_sport": {
 			AllowedValues: []string{"0", "1"},
 		},
 		"ui_default": {

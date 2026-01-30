@@ -1,11 +1,11 @@
 let diaries = [];
 let state = loadAppState("diary");
-let autoSaveInterval = 10 * 1000; // 1秒
-let autoSaveTimer = null;
+const draftCache = new Map(); // key: yyyymmdd, value: {content, weather, location}
+let saveTimer = null;
+const SAVE_DELAY = 300;
 
 
 function applyState() {
-    // 日期
     if (state.date) {
         $('#date-picker').val(state.date);
     } else {
@@ -13,14 +13,9 @@ function applyState() {
         $('#date-picker').val(today);
         state.date = today;
     }
-
-    // 自动保存
-    $('#cb-autosave').prop('checked', !!state.autosave);
-
 }
 
 
-// 从服务器加载指定月份的日记数据
 function loadDiaries() {
     let d = new Date(state.date);
     let month = d.getMonth() + 1;
@@ -31,7 +26,6 @@ function loadDiaries() {
     });
 }
 
-// 根据当前视图更新页面显示
 function updateView() {
     if (state.view === VIEW_DAILY) {
         updateDailyView();
@@ -46,9 +40,7 @@ function updateWeatherAndLocation() {
     $('#le-location').val(diary.location);
 }
 
-
 function getLunarText(date, withMonth = false) {
-    // 检查库是否成功加载
     if (typeof solarlunar === 'undefined') {
         console.error('solarlunar-es 库未正确加载。');
         return '';
@@ -79,7 +71,6 @@ function getLunarText(date, withMonth = false) {
 }
 
 function getHolidayText(date) {
-    // 检查库是否成功加载
     return ''; // TODO
 }
 
@@ -172,66 +163,8 @@ function updateMonthlyView() {
     $('#tw-body').html(html);
 }
 
-function updateDiary() {
-    let id = date2int(state.date);
-    let diary = diaries.find(d => d.id === id);
-    if (!diary) {
-        diary = { id: id, content: "", weather: "", location: "" }
-        diaries.push(diary)
-    }
-
-    const content = getCurrentContent().trim()
-    const weather = $('#le-weather').val().trim()
-    const location = $('#le-location').val().trim()
-    if (diary.content.trim() === content &&
-        diary.weather.trim() === weather &&
-        diary.location.trim() === location) {
-        console.log("No changes, skip saving.");
-        return;
-    }
-    diary.content = content
-    diary.weather = weather
-    diary.location = location
-    API.post('/api/diary/update', diary, () => { console.log("Saved"); });
-}
-
-const debouncedUpdate = debounce(updateDiary, 700);
-
-// -------------------- 自动保存逻辑 --------------------
-function startAutoSave() {
-    if (autoSaveTimer) clearInterval(autoSaveTimer);
-    autoSaveTimer = setInterval(() => {
-        if ($('#cb-autosave').is(':checked')) {
-            debouncedUpdate();
-        }
-    }, autoSaveInterval);
-}
-
-function getCurrentContent1() {
-    if (state.view === VIEW_DAILY) {
-        return $('#te-content').text().trim();
-    }
-    const id = date2int(state.date);
-    return $(`td[data-date="${id}"] .cell-content`).text().trim();
-}
-
-function getCurrentContent() {
-    let html = '';
-    if (state.view === VIEW_DAILY) {
-        html = $('#te-content').html();
-    } else {
-        const id = date2int(state.date);
-        html = $(`td[data-date="${id}"] .cell-content`).html();
-    }
-    html = contenteditable2str(html)
-    return html.trim();
-}
-
 // -------------------- 事件绑定 --------------------
 $('#date-picker').change(function () {
-    if ($('#cb-autosave').is(':checked')) {
-        debouncedUpdate();
-    }
     let previous = state.date
     let current = $('#date-picker').val()
     state.date = current;
@@ -240,7 +173,6 @@ $('#date-picker').change(function () {
     }
     updateWeatherAndLocation();
 });
-$('#btn-save').click(debouncedUpdate);
 $('#btn-import').click(() => {
     $('#import-file').val('');
     $('#import-file').click();
@@ -263,9 +195,6 @@ $('#btn-export').click(() => {
     console.log("Exporting...");
     window.location.href = `/api/diary/export`;
 });
-$('#cb-autosave').change(() => {
-    state.autosave = $('#cb-autosave').is(':checked');
-});
 $('#btn-daily').click(() => {
     state.view = VIEW_DAILY;
     updateView();
@@ -276,18 +205,8 @@ $('#btn-monthly').click(() => {
     updateView();
 });
 
-// 触发自动保存的 focusout
-$('#tw-content, #le-weather, #le-location').on('focusout', function () {
-    if ($('#cb-autosave').is(':checked')) {
-        debouncedUpdate();
-    }
-});
 
-// 月视图点击日期
 $('#tw-content').on('click', '.month-active', function () {
-    if ($('#cb-autosave').is(':checked')) {
-        debouncedUpdate();
-    }
     let id = $(this).data('date'); // yyyymmdd
     let y = id.toString().substring(0, 4);
     let m = id.toString().substring(4, 6);
@@ -299,15 +218,104 @@ $('#tw-content').on('click', '.month-active', function () {
     updateWeatherAndLocation();
 });
 
-// Ctrl+Enter 保存
-$(document).on('keydown', function (e) {
-    if (e.ctrlKey && e.key === 'Enter') {
-        debouncedUpdate();
+function getDiaryByDate(dateStr) {
+    const id = date2int(dateStr);
+    let diary = diaries.find(d => d.id === id);
+    if (!diary) {
+        diary = { id, content: "", weather: "", location: "" };
+        diaries.push(diary);
+    }
+    return diary;
+}
+
+function getCurrentContent() {
+    let html = '';
+    if (state.view === VIEW_DAILY) {
+        html = $('#te-content').html();
+    } else {
+        const id = date2int(state.date);
+        html = $(`td[data-date="${id}"] .cell-content`).html();
+    }
+    html = contenteditable2str(html)
+    return html.trim();
+}
+
+function readCurrentEditor() {
+    return {
+        content: getCurrentContent(),
+        weather: $('#le-weather').val().trim(),
+        location: $('#le-location').val().trim(),
+    };
+}
+
+function shallowEqual(a, b) {
+    return a &&
+        b &&
+        a.content === b.content &&
+        a.weather === b.weather &&
+        a.location === b.location;
+}
+
+function updateDraft(dateStr) {
+    const diary = getDiaryByDate(dateStr);
+    const current = readCurrentEditor();
+    if (
+        diary.content === current.content &&
+        diary.weather === current.weather &&
+        diary.location === current.location
+    ) {
+        draftCache.delete(dateStr);
+        return;
+    }
+    draftCache.set(dateStr, current);
+    scheduleSave(dateStr);
+}
+
+function scheduleSave(dateStr) {
+    if (saveTimer) clearTimeout(saveTimer);
+
+    saveTimer = setTimeout(() => {
+        saveTimer = null;
+        saveDraft(dateStr);
+    }, SAVE_DELAY);
+}
+
+function saveDraft(dateStr) {
+    const draft = draftCache.get(dateStr);
+    if (!draft) return;
+    const diary = getDiaryByDate(dateStr);
+    API.post('/api/diary/update', {
+        id: diary.id,
+        content: draft.content,
+        weather: draft.weather,
+        location: draft.location,
+    }, () => {
+        diary.content = draft.content;
+        diary.weather = draft.weather;
+        diary.location = draft.location;
+        draftCache.delete(dateStr);
+        console.log('Saved', dateStr);
+    });
+}
+
+$('#tw-body').on('input', '[contenteditable]', function () {
+    updateDraft(state.date);
+});
+
+$('#le-weather, #le-location').on('input', function () {
+    updateDraft(state.date);
+});
+
+$('#le-weather, #le-location').on('keydown', function (e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        updateDraft(state.date);
+        this.blur();
     }
 });
+
 
 applyState();    // 1. 加载页面状态
 loadDiaries();   // 2. 加载数据
 updateView();    // 3. 渲染视图
-startAutoSave(); // 初始化自动保存
 addUnloadListener("diary", state)

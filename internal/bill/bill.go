@@ -5,7 +5,6 @@ import (
 	"diarygo/internal/utils"
 )
 
-// Bill model
 type Bill struct {
 	ID     int     `json:"id"`
 	Date   int     `json:"date"`

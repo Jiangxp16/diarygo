@@ -80,14 +80,14 @@ function renderTable() {
           <td style="display:none">${bill.id}</td>
           <td contenteditable="true" data-field="date" data-type="int" class="td-center">${bill.date}</td>
           <td>
-            <select class="form-select form-select-sm inout-select td-center" data-field="inout" data-type="int">
+            <select class="form-select form-select-sm inout-select" data-field="inout" data-type="int">
               <option value="1" ${bill.inout === 1 ? "selected" : ""}>${I18N["In"]}</option>
               <option value="-1" ${bill.inout === -1 ? "selected" : ""}>${I18N["Out"]}</option>
             </select>
           </td>
           <td contenteditable="true" data-field="type" data-type="string" class="td-center">${bill.type}</td>
           <td contenteditable="true" data-field="amount" data-type="float" class="td-center">${bill.amount}</td>
-          <td contenteditable="true" data-field="item" data-type="string">${bill.item}</td>
+          <td contenteditable="true" data-field="item" data-type="string" class="td-left">${bill.item}</td>
         </tr>
       `);
     if (bill.id == selectedId) { tr.addClass("table-active"); }
@@ -216,3 +216,20 @@ initTable("bill-table", sortState, updateView);
 applyState();
 loadBills();
 addUnloadListener("bill", state)
+
+// 1. 粘贴时只允许纯文本
+$("#bill-table tbody").on("paste", "td[contenteditable]", function (e) {
+    e.preventDefault();
+    const text = (e.originalEvent || e)
+        .clipboardData
+        .getData("text/plain");
+    document.execCommand("insertText", false, text);
+});
+
+// 2. 禁止回车
+$("#bill-table tbody").on("keydown", "td[contenteditable]", function (e) {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        this.blur();
+    }
+});

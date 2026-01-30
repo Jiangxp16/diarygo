@@ -27,6 +27,11 @@ func GetCurrentDateInt() int {
 	return Date2Int(time.Now())
 }
 
+func GetCurrentYYYYMM() int {
+	date := time.Now()
+	return date.Year()*100 + int(date.Month())
+}
+
 func GetNowYYMMDD() string {
 	now := time.Now()
 	return now.Format("060102")
@@ -49,7 +54,6 @@ func MakePlaceholders(n int) []string {
 	}
 	return s
 }
-
 
 func NormalizeID(v any) (int, error) {
 	switch x := v.(type) {

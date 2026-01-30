@@ -1,0 +1,26 @@
+.div-container {
+    display: flex;
+    margin-bottom: 10px;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.date-picker {
+    min-width: 100px;
+    width: 170px;
+}
+
+.month-picker {
+    min-width: 100px;
+    width: 200px;
+}
+
+.line-input {
+    min-width: 100px;
+    width: 150px;
+}
+
+.bold {
+    font-weight: bold;
+}

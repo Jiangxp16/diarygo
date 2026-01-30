@@ -1,6 +1,7 @@
 package server
 
 import (
+	"diarygo/internal/i18n"
 	"diarygo/internal/utils"
 	"encoding/json"
 	"fmt"
@@ -9,6 +10,10 @@ import (
 	"net/http"
 	"strconv"
 )
+
+var funcMap = template.FuncMap{
+	"t": i18n.T,
+}
 
 func decodeJSON(r *http.Request, v any) error {
 	return json.NewDecoder(r.Body).Decode(v)

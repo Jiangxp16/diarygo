@@ -41,9 +41,9 @@ function renderTable() {
         <tr data-id="${i.id}">
             <td style="display:none">${i.id}</td>
             <td contenteditable data-field="added" data-type="int" class="td-center">${i.added}</td>
-            <td contenteditable data-field="name" data-type="string">${i.name}</td>
+            <td contenteditable data-field="name" data-type="string" class="td-left">${i.name}</td>
             <td>
-            <select class="form-select form-select-sm sort-select td-center" data-field="sort" data-type="int">
+            <select class="form-select form-select-sm sort-select" data-field="sort" data-type="int">
                 ${INTEREST_SORTS.map((s, idx) => `
                 <option value="${idx}" ${idx === i.sort ? "selected" : ""}>${I18N[s]}</option>
                 `).join("")}
@@ -55,7 +55,7 @@ function renderTable() {
             <td contenteditable data-field="score_db" data-type="float" class="td-center">${i.score_db}</td>
             <td contenteditable data-field="score_imdb" data-type="float" class="td-center">${i.score_imdb}</td>
             <td contenteditable data-field="score" data-type="float" class="td-center">${i.score}</td>
-            <td contenteditable data-field="remark" data-type="string">${i.remark}</td>
+            <td contenteditable data-field="remark" data-type="string" class="td-left">${i.remark}</td>
         </tr>
         `);
         if (i.id == selectedId) { tr.addClass("table-active"); }
@@ -141,3 +141,20 @@ initTable("interest-table", sortState, updateView);
 applyState();
 loadInterests();
 addUnloadListener("interest", state)
+
+// 1. 粘贴时只允许纯文本
+$("#interest-table tbody").on("paste", "td[contenteditable]", function (e) {
+    e.preventDefault();
+    const text = (e.originalEvent || e)
+        .clipboardData
+        .getData("text/plain");
+    document.execCommand("insertText", false, text);
+});
+
+// 2. 禁止回车
+$("#interest-table tbody").on("keydown", "td[contenteditable]", function (e) {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        this.blur();
+    }
+});

@@ -1,0 +1,34 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  cmd = "go build -o tmp/diarygo ./cmd/diarygo/main.go"
+
+  bin = "tmp/diarygo"
+
+  delay = 800
+
+  include_ext = ["go", "html", "tpl", "js", "css"]
+
+  exclude_dir = [
+    "tmp",
+    "data",
+    "config",
+    ".git",
+    "vendor"
+  ]
+
+  exclude_file = []
+
+  stop_on_error = true
+
+  send_interrupt = true
+
+[log]
+  time = true
+
+[color]
+  main = "yellow"
+  watcher = "cyan"
+  build = "green"
+  runner = "magenta"

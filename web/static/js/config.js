@@ -9,6 +9,7 @@ function getCurrentConfig() {
         show_bill: $('#cfg-show_bill').is(':checked'),
         show_interest: $('#cfg-show_interest').is(':checked'),
         show_note: $('#cfg-show_note').is(':checked'),
+        show_sport: $('#cfg-show_sport').is(':checked'),
         ui_default: $('#cfg-ui_default').val(),
     };
 }
@@ -50,6 +51,7 @@ $(function () {
     $('#cfg-show_bill').prop('checked', cfg.show_bill);
     $('#cfg-show_interest').prop('checked', cfg.show_interest);
     $('#cfg-show_note').prop('checked', cfg.show_note);
+    $('#cfg-show_sport').prop('checked', cfg.show_sport);
 
     initialConfig = getCurrentConfig();
 });

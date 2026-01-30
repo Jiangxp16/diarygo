@@ -11,17 +11,19 @@
 .table-container table {
   min-width: 100%;
   table-layout: fixed;
-  border-collapse: separate; /* 修改：从默认的collapse改为separate，避免sticky在collapse模式下的渲染bug（某些浏览器问题） */
-  border-spacing: 0; /* 配合separate使用，保持边框间距为0，模拟collapse效果 */
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 .table-container th,
 .table-container td {
   min-width: 0;
   white-space: nowrap;
-  overflow: hidden;
+  overflow: auto;
+  scrollbar-width: none;
   text-overflow: auto;
-  box-sizing: border-box; /* ⭐ 防止 padding 干扰 */
+  box-sizing: border-box;
+  vertical-align: middle;
 }
 
 .table-container th {
@@ -39,19 +41,19 @@
 }
 
 .table-container thead {
-  position: sticky; /* 修改：将sticky从th移到thead（或thead tr），以确保整个表头行固定。有些浏览器对th的sticky支持更好，但移到thead可提升兼容性 */
+  position: sticky;
   top: 0;
-  background-color: #f8f9fa; /* 背景色移到thead，确保整个表头区域覆盖 */
-  z-index: 2; /* 提高z-index值（从1改为2），确保表头在内容上方 */
+  background-color: #f8f9fa;
+  z-index: 2;
 }
 
 .table-container thead th {
-  background-color: #f8f9fa; /* 重复设置th背景，防止子元素透明 */
-  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);  /* 底部阴影 */
+  background-color: #f8f9fa;
+  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
 }
 
 .table-container tbody tr td {
-  border-bottom: 1.5px solid #bfc5cc; /* 比 bootstrap 默认深 */
+  border-bottom: 1.5px solid #bfc5cc;
 }
 
 .td-center {
@@ -61,15 +63,21 @@
 
 .td-left {
   text-align: left;
+  vertical-align: middle;
 }
 
-/* 表头居中 */
 .table-container th.th-center {
   text-align: center;
   vertical-align: middle;
 }
 
-/* 表头左对齐 */
 .table-container th.th-left {
   text-align: left;
+}
+
+.table-container select.form-select.sort-select {
+  padding-left: 0.4rem;
+  padding-right: 1rem;
+  background-position: right 0.25rem center;
+  min-width: 0;
 }

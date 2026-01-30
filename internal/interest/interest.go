@@ -15,8 +15,8 @@ type Interest struct {
 	Progress   string  `json:"progress"`
 	Publish    int     `json:"publish"`
 	Date       int     `json:"date"`
-	Score_DB   float64 `json:"score_db"`	//lint:ignore ST1003
-	Score_IMDB float64 `json:"score_imdb"`	//lint:ignore ST1003
+	Score_DB   float64 `json:"score_db"`   //lint:ignore ST1003
+	Score_IMDB float64 `json:"score_imdb"` //lint:ignore ST1003
 	Score      float64 `json:"score"`
 	Remark     string  `json:"remark"`
 }
@@ -66,12 +66,11 @@ func (r *Repository) Add(i *Interest) (*Interest, error) {
 	if i.Sort == 0 {
 		i.Sort = 7
 	}
-	current := utils.GetCurrentDateInt()
 	if i.Added == 0 {
-		i.Added = current
+		i.Added = utils.GetCurrentDateInt()
 	}
 	if i.Date == 0 {
-		i.Date = current
+		i.Date = utils.GetCurrentYYYYMM()
 	}
 	return r.BaseRepository.Add(i)
 }

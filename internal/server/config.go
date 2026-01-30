@@ -22,6 +22,7 @@ func confJsHandler(w http.ResponseWriter, r *http.Request) {
 		"show_bill":         cfg.GetBool("global", "show_bill"),
 		"show_interest":     cfg.GetBool("global", "show_interest"),
 		"show_note":         cfg.GetBool("global", "show_note"),
+		"show_sport":        cfg.GetBool("global", "show_sport"),
 		"ui_default":        cfg.Get("global", "ui_default"),
 		"logo":              cfg.Get("style", "logo"),
 		"font":              cfg.Get("style", "font"),
@@ -100,9 +101,8 @@ func configChangePasswordAPI(w http.ResponseWriter, r *http.Request) {
 
 	cfg := config.GetRepository()
 
-	d := db.Get() // 你项目里已有的 DB 获取方式
+	d := db.Get()
 
-	// 核心逻辑：修改密码 + 全库重加密
 	if err := cfg.ChangePassword(d, req.OldPassword, req.NewPassword); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

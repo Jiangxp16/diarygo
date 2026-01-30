@@ -13,7 +13,7 @@ const sessionCookie = "diarygo_session"
 // -------------------- session helper --------------------
 func checkSession(r *http.Request) bool {
 	cookie, err := r.Cookie(sessionCookie)
-	if err != nil || cookie.Value == "" {
+	if err != nil {
 		return false
 	}
 	ok := config.GetRepository().CheckPassword(cookie.Value)
@@ -45,47 +45,4 @@ func clearSession(w http.ResponseWriter) {
 		Expires: time.Now().Add(-1 * time.Hour),
 		Path:    "/",
 	})
-}
-
-func loginPage(w http.ResponseWriter, r *http.Request) {
-	loginTpl.Execute(w, nil)
-}
-
-func loginHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
-	password := r.FormValue("password")
-	cfg := config.GetRepository()
-	ok := cfg.CheckPassword(password)
-	if !ok {
-		stored := cfg.GetPassword()
-		if stored == "" {
-			cfg.SetPassword(password)
-			ok = true
-		}
-	}
-	if ok {
-		setSession(w, password)
-		uiDefault := cfg.Get("global", "ui_default")
-		http.Redirect(w, r, "/"+uiDefault, http.StatusSeeOther)
-		return
-	}
-	loginTpl.Execute(w, map[string]string{"Error": "Password incorrect"})
-}
-
-func logoutHandler(w http.ResponseWriter, r *http.Request) {
-	clearSession(w)
-	http.Redirect(w, r, "/", http.StatusSeeOther)
-}
-
-func requireLogin(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if !checkSession(r) {
-			http.Redirect(w, r, "/", http.StatusSeeOther)
-			return
-		}
-		next(w, r)
-	}
 }

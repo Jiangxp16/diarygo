@@ -50,6 +50,10 @@ func Init(dbPath string) {
 			dbPath = "diary.db"
 		}
 		instance, initErr = Open(dbPath)
+		instance.Exec(`PRAGMA journal_mode = WAL`, nil, false)
+		instance.Exec(`PRAGMA synchronous = NORMAL`, nil, false)
+		instance.Exec(`PRAGMA busy_timeout = 5000`, nil, false)
+		instance.Exec(`PRAGMA wal_autocheckpoint = 1000`, nil, false)
 	})
 	if initErr != nil {
 		panic(initErr)

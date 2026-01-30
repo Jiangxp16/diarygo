@@ -1,6 +1,7 @@
 {{define "title"}}{{ t "Interest" }}{{end}}
 
 {{define "extra-head"}}
+<link rel="stylesheet" href="/static/css/global.css">
 <link rel="stylesheet" href="/static/css/interest.css">
 <link rel="stylesheet" href="/static/css/table.css">
 {{end}}
@@ -8,10 +9,24 @@
 {{define "content"}}
 
 <!-- 顶部控制区 -->
-<div class="d-flex align-items-center mb-3 gap-2">
-    <div class="ms-auto"></div>
-    <select id="sort-select" class="form-select form-select-sm" style="width:160px;"></select>
+
+<div class="div-container">
+    <div class="div-container">
+        <button id="btn-import" class="btn btn-sm btn-info">{{ t "Import" }}</button>
+        <button id="btn-export" class="btn btn-sm btn-warning">{{ t "Export" }}</button>
+        <input type="file" id="importFile" accept=".xlsx" hidden>
+    </div>
+
+    <div class="div-container">
+        <select id="sort-select" class="form-select form-select-sm" style="width:150px;"></select>
+        <input type="text" id="filter" class="form-control form-control-sm"
+               style="width:200px;" placeholder="{{ t "Search..." }}">
+        <button id="btn-add" class="btn btn-sm btn-success">{{ t "Add" }}</button>
+        <button id="btn-del" class="btn btn-sm btn-danger">{{ t "Del" }}</button>
+    </div>
 </div>
+
+<br>
 
 <!-- 表格 -->
 <div class="table-container">
@@ -33,22 +48,6 @@
         </thead>
         <tbody></tbody>
     </table>
-</div>
-
-<!-- 底部操作 -->
-<div class="d-flex justify-content-between mt-2">
-    <div class="d-flex gap-2">
-        <button id="btn-import" class="btn btn-sm btn-info">{{ t "Import" }}</button>
-        <button id="btn-export" class="btn btn-sm btn-warning">{{ t "Export" }}</button>
-        <input type="file" id="importFile" accept=".xlsx" hidden>
-    </div>
-
-    <div class="d-flex gap-2">
-        <input type="text" id="filter" class="form-control form-control-sm"
-               style="width:200px;" placeholder="{{ t "Search..." }}">
-        <button id="btn-add" class="btn btn-sm btn-success">{{ t "Add" }}</button>
-        <button id="btn-del" class="btn btn-sm btn-danger">{{ t "Del" }}</button>
-    </div>
 </div>
 
 {{end}}

@@ -2,48 +2,42 @@ let list = [];
 let filtered = [];
 let currentFilter = "";
 let selectedId = null;
-let state = loadAppState("note")
+let state = loadAppState("sport")
 let stateFilter = 0;
 let sortState = { key: null, order: null };
 
 function applyState() {
-    flag = state.flag || 0
-    $("#flag-select").val(flag)
 }
 
 function loadNotes() {
-    API.get('/api/note/list', data => {
+    API.get('/api/sport/list', data => {
         list = data;
         updateView();
     });
 }
 
 function applyFilter() {
-    filtered = list.filter(note => {
-        let matchFilter = !currentFilter || String(note).toLowerCase().includes(currentFilter.toLowerCase());
+    filtered = list.filter(sport => {
+        let matchFilter = !currentFilter || String(sport).toLowerCase().includes(currentFilter.toLowerCase());
         let matchState = stateFilter === 0 ||
-            (stateFilter === 1 && note.process < 100) ||
-            (stateFilter === 2 && note.process >= 100);
+            (stateFilter === 1 && sport.process < 100) ||
+            (stateFilter === 2 && sport.process >= 100);
         return matchFilter && matchState;
     });
 }
 
 function renderTable() {
-    const tbody = $("#note-table tbody");
+    const tbody = $("#sport-table tbody");
     tbody.empty();
-    filtered.forEach(note => {
+    filtered.forEach(sport => {
         const tr = $(`
-      <tr data-id="${note.id}">
-        <td style="display:none">${note.id}</td>
-        <td contenteditable="true" data-field="begin" data-type="int" class="td-center">${note.begin}</td>
-        <td contenteditable="true" data-field="last" data-type="int" class="td-center">${note.last}</td>
-        <td contenteditable="true" data-field="process" data-type="int" class="td-center">${note.process}</td>
-        <td contenteditable="true" data-field="desire" data-type="int" class="td-center">${note.desire}</td>
-        <td contenteditable="true" data-field="priority" data-type="int" class="td-center">${note.priority}</td>
-        <td contenteditable="true" data-field="content" data-type="string class="td-left"">${str2contenteditable(note.content)}</td>
+      <tr data-id="${sport.id}">
+        <td style="display:none">${sport.id}</td>
+        <td contenteditable="true" data-field="date" data-type="int" class="td-center">${sport.date}</td>
+        <td contenteditable="true" data-field="content" data-type="string class="td-left"">${str2contenteditable(sport.content)}</td>
       </tr>
     `);
-        if (note.id == selectedId) tr.addClass('table-active');
+        if (sport.id == selectedId) tr.addClass('table-active');
         tbody.append(tr);
     });
 }
@@ -65,26 +59,26 @@ $("#filter").on("input", function () {
     updateView();
 });
 
-$("#note-table tbody").on("click", "tr", function () {
+$("#sport-table tbody").on("click", "tr", function () {
     selectedId = $(this).data("id");
     $(this).addClass("table-active").siblings().removeClass("table-active");
 });
 
 function handleUpdate() {
     const id = $(this).closest("tr").data("id");
-    const note = list.find(n => n.id === id);
-    if (!note) return;
+    const sport = list.find(n => n.id === id);
+    if (!sport) return;
     const field = $(this).data("field");
     const value = getEditorValue(this);
-    if (note[field] === value) return;
-    note[field] = value;
-    API.post('/api/note/update', { id, [field]: value });
+    if (sport[field] === value) return;
+    sport[field] = value;
+    API.post('/api/sport/update', { id, [field]: value });
 }
 
-$("#note-table tbody").on("blur", "td[contenteditable]", handleUpdate);
+$("#sport-table tbody").on("blur", "td[contenteditable]", handleUpdate);
 
 $("#btn-add").click(() => {
-    API.post('/api/note/add', {}, () => {
+    API.post('/api/sport/add', {}, () => {
         loadNotes()
     });
 });
@@ -96,7 +90,7 @@ $("#btn-del").click(async function() {
         'info'
     );
     if (!ok) return;
-    API.delete(`/api/note/delete?id=${selectedId}`, null, () => {
+    API.delete(`/api/sport/delete?id=${selectedId}`, null, () => {
         list = list.filter(n => n.id !== selectedId);
         selectedId = null;
         updateView();
@@ -108,31 +102,27 @@ $("#importFile").change(function () {
     if (!this.files.length) return;
     const form = new FormData();
     form.append("file", this.files[0]);
-    API.upload('/api/note/import', form, () => {
+    API.upload('/api/sport/import', form, () => {
         loadNotes();
         showSuccess('Import successful');
         this.value = "";
     });
 });
 
-$("#btn-expprt").click(() => {
-    window.location.href = `/api/note/export`;
+$("#btn-export").click(() => {
+    window.location.href = `/api/sport/export`;
 });
 
-initTable("note-table", sortState, updateView);
+initTable("sport-table", sortState, updateView);
 applyState();
 loadNotes();
-addUnloadListener("note", state)
+addUnloadListener("sport", state)
 
 const noEnterFields = new Set([
-    "begin",
-    "last",
-    "progress",
-    "desire",
-    "priority",
+    "date",
 ]);
 
-$("#note-table tbody").on("keydown", "td[contenteditable]", function (e) {
+$("#sport-table tbody").on("keydown", "td[contenteditable]", function (e) {
     if (e.key !== "Enter") return;
 
     const field = $(this).data("field");

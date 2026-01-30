@@ -1,0 +1,13 @@
+services:
+  diarygo:
+    build: .
+    container_name: diarygo_app
+    ports:
+      - "58080:8080"
+    volumes:
+      - /volume1/docker/diarygo/config:/app/config    # 宿主机 config 目录挂载
+      - /volume1/docker/diarygo/data:/app/data        # 宿主机 data 目录挂载
+    environment:
+      - APP_PORT=8080
+      - GIN_MODE=release
+    restart: unless-stopped

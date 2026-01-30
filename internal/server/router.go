@@ -2,19 +2,17 @@ package server
 
 import (
 	"diarygo/internal/bill"
+	"diarygo/internal/config"
 	"diarygo/internal/db"
 	"diarygo/internal/diary"
-	"diarygo/internal/i18n"
 	"diarygo/internal/interest"
 	"diarygo/internal/note"
+	"diarygo/internal/sport"
 	"html/template"
 	"net/http"
 	"strconv"
 )
 
-var funcMap = template.FuncMap{
-	"t": i18n.T,
-}
 var (
 	loginTpl  *template.Template
 	configTpl *template.Template
@@ -28,6 +26,7 @@ func RegisterRoutes() {
 	diaryRes := RegisterDiaryResource(DB)
 	interestRes := RegisterInterestResource(DB)
 	noteRes := RegisterNoteResource(DB)
+	sportRes := RegisterSportResource(DB)
 
 	// -------------------- Web 页面 --------------------
 	http.HandleFunc("/", loginPage)
@@ -39,6 +38,7 @@ func RegisterRoutes() {
 	http.HandleFunc("/bill", PageHandler(billRes))
 	http.HandleFunc("/note", PageHandler(noteRes))
 	http.HandleFunc("/interest", PageHandler(interestRes))
+	http.HandleFunc("/sport", PageHandler(sportRes))
 
 	// -------------------- REST API --------------------
 	http.HandleFunc("/api/config/batch", requireLogin(configBatchAPI))
@@ -69,6 +69,13 @@ func RegisterRoutes() {
 	http.HandleFunc("/api/note/delete", DeleteHandler(noteRes))
 	http.HandleFunc("/api/note/export", ExportHandler(noteRes))
 	http.HandleFunc("/api/note/import", ImportHandler(noteRes))
+
+	http.HandleFunc("/api/sport/list", ListHandler(sportRes))
+	http.HandleFunc("/api/sport/add", AddHandler(sportRes))
+	http.HandleFunc("/api/sport/update", UpdateByIDHandler(sportRes))
+	http.HandleFunc("/api/sport/delete", DeleteHandler(sportRes))
+	http.HandleFunc("/api/sport/export", ExportHandler(sportRes))
+	http.HandleFunc("/api/sport/import", ImportHandler(sportRes))
 
 	// 静态资源
 	http.HandleFunc("/static/js/conf.js", confJsHandler)
@@ -122,11 +129,63 @@ func RegisterInterestResource(DB *db.DB) Resource[interest.Interest] {
 		},
 	}
 }
+
 func RegisterNoteResource(DB *db.DB) Resource[note.Note] {
 	repo := note.NewRepository(DB)
 	return Resource[note.Note]{
 		Name: note.TABLE,
 		Tpl:  initTemplate("note.html", "web/templates/note.html", true),
 		Repo: repo,
+	}
+}
+func RegisterSportResource(DB *db.DB) Resource[sport.Sport] {
+	repo := sport.NewRepository(DB)
+	return Resource[sport.Sport]{
+		Name: sport.TABLE,
+		Tpl:  initTemplate("sport.html", "web/templates/sport.html", true),
+		Repo: repo,
+	}
+}
+
+func loginPage(w http.ResponseWriter, r *http.Request) {
+	loginTpl.Execute(w, nil)
+}
+
+func loginHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	password := r.FormValue("password")
+	cfg := config.GetRepository()
+	ok := cfg.CheckPassword(password)
+	if !ok {
+		stored := cfg.GetPassword()
+		if stored == "" {
+			cfg.SetPassword(password)
+			ok = true
+		}
+	}
+	if ok {
+		setSession(w, password)
+		uiDefault := cfg.Get("global", "ui_default")
+		http.Redirect(w, r, "/"+uiDefault, http.StatusSeeOther)
+		return
+	}
+	loginTpl.Execute(w, map[string]string{"Error": "Password incorrect"})
+}
+
+func logoutHandler(w http.ResponseWriter, r *http.Request) {
+	clearSession(w)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func requireLogin(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if !checkSession(r) {
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
+		}
+		next(w, r)
 	}
 }

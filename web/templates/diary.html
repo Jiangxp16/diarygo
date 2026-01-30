@@ -1,20 +1,31 @@
 {{define "title"}}{{ t "Diary" }}{{end}}
 
 {{define "extra-head"}}
+<link rel="stylesheet" href="/static/css/global.css">
 <link rel="stylesheet" href="/static/css/diary.css">
 {{end}}
 
 {{define "content"}}
-<!-- 顶部工具栏 -->
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
+
+<div class="div-container">
+    <div class="div-container">
+        <input type="file" id="import-file" accept=".xlsx" style="display:none;">
+        <button id="btn-import" class="btn btn-info btn-sm">{{ t "Import" }}</button>
+        <button id="btn-export" class="btn btn-warning btn-sm">{{ t "Export" }}</button>
+    </div>
+    <div class="ms-auto div-container">
+    </div>
+</div>
+
+<div class="div-container">
+    <div class="div-container">
         <button id="btn-daily" class="btn btn-primary btn-sm">{{ t "Daily" }}</button>
         <button id="btn-monthly" class="btn btn-primary btn-sm">{{ t "Monthly"}}</button>
     </div>
-    <div>
-        <input type="date" id="date-picker" class="form-control form-control-sm d-inline-block" style="width:auto;">
-        <input type="text" id="le-weather" class="form-control form-control-sm d-inline-block" style="width:120px;" placeholder="Weather">
-        <input type="text" id="le-location" class="form-control form-control-sm d-inline-block" style="width:120px;" placeholder="Location">
+    <div class="div-container">
+        <input type="date" id="date-picker" class="form-control form-control-sm d-inline-block date-picker">
+        <input type="text" id="le-weather" class="form-control form-control-sm d-inline-block line-input" placeholder="{{ t "Weather" }}">
+        <input type="text" id="le-location" class="form-control form-control-sm d-inline-block line-input" placeholder="{{ t "Location" }}">
     </div>
 </div>
 
@@ -24,20 +35,6 @@
     <tbody id="tw-body"></tbody>
 </table>
 
-<div class="d-flex justify-content-between align-items-center">
-    <div>
-        <input type="file" id="import-file" accept=".xlsx" style="display:none;">
-        <button id="btn-import" class="btn btn-info btn-sm">{{ t "Import" }}</button>
-        <button id="btn-export" class="btn btn-warning btn-sm">{{ t "Export" }}</button>
-    </div>
-    <div class="d-flex align-items-center">
-        <div class="form-check form-check-inline ms-2">
-            <input class="form-check-input" type="checkbox" id="cb-autosave" checked>
-            <label class="form-check-label" for="cb-autosave">{{ t "Auto" }}</label>
-        </div>
-        <button id="btn-save" class="btn btn-success btn-sm ms-2">{{ t "Save" }}</button>
-    </div>
-</div>
 {{end}}
 
 {{define "extra-scripts"}}

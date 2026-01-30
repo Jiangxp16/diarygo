@@ -2,6 +2,7 @@
 
 
 {{define "extra-head"}}
+<link rel="stylesheet" href="/static/css/global.css">
 <link rel="stylesheet" href="/static/css/config.css">
 {{end}}
 
@@ -51,6 +52,7 @@
       <option value="bill">{{ t "Bill" }}</option>
       <option value="interest">{{ t "Interest" }}</option>
       <option value="note">{{ t "Note" }}</option>
+      <option value="sport">{{ t "Sport" }}</option>
     </select>
   </div>
 
@@ -67,6 +69,11 @@
   <div class="form-check form-row">
     <input class="form-check-input" type="checkbox" id="cfg-show_note">
     <label class="form-check-label">{{ t "Enable Note" }}</label>
+  </div>
+
+  <div class="form-check form-row">
+    <input class="form-check-input" type="checkbox" id="cfg-show_sport">
+    <label class="form-check-label">{{ t "Enable Sport" }}</label>
   </div>
 
   <button type="submit" class="btn btn-primary btn-sm mt-3">

@@ -22,6 +22,7 @@ window.appState = {
     note: {
         flag: 0,
     },
+    sport: {},
 }
 
 function castValue(value, type) {
@@ -177,6 +178,9 @@ function applyNavConfig() {
     if (!APP_CONFIG.show_interest) {
         $('#nav-interest').remove();
     }
+    if (!APP_CONFIG.show_sport) {
+        $('#nav-sport').remove();
+    }
 }
 
 function loadAppState(module) {
@@ -203,8 +207,9 @@ function saveAppState(module, state) {
     localStorage.setItem(APP_KEY, JSON.stringify(fullState));
 }
 
-function addUnloadListener(module, state) {
+function addUnloadListener(module, state, fn=null) {
     window.addEventListener('beforeunload', ()=>{
+        if (fn !== null) { fn() }
         saveAppState(module, state);
     })
 }

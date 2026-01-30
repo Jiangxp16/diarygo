@@ -2,17 +2,18 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>{{ t "Login" }}</title>
+<title>{{ t "DiaryGo" }}</title>
+<link rel="stylesheet" href="/static/css/global.css">
 <link href="/static/js/imp/bootstrap.min.css" rel="stylesheet">
 <link id="favicon" rel="icon" href="/static/imgs/logo.png" type="image/png" sizes="32x32">
 </head>
 <body class="bg-light">
 <div class="container">
 	<div class="row justify-content-center mt-5">
-		<div class="col-4" style="min-width: 250px;">
+		<div class="col-4" style="min-width: 350px;">
 			<div class="card shadow">
 				<div class="card-body">
-					<h3 class="card-title text-center">{{ t "Login" }}</h3>
+					<!--<h3 class="card-title text-left">{{ t "Login" }}</h3>-->
 					{{if .Error}}<div class="alert alert-danger">{{.Error}}</div>{{end}}
 					<form method="POST" action="/login">
 						<div class="mb-3">
