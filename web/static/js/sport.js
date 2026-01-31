@@ -34,7 +34,7 @@ function renderTable() {
       <tr data-id="${sport.id}">
         <td style="display:none">${sport.id}</td>
         <td contenteditable="true" data-field="date" data-type="int" class="td-center">${sport.date}</td>
-        <td contenteditable="true" data-field="content" data-type="string class="td-left"">${str2contenteditable(sport.content)}</td>
+        <td contenteditable="true" data-field="content" data-type="string" class="td-left">${str2contenteditable(sport.content)}</td>
       </tr>
     `);
         if (sport.id == selectedId) tr.addClass('table-active');

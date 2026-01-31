@@ -40,7 +40,7 @@ function renderTable() {
         <td contenteditable="true" data-field="process" data-type="int" class="td-center">${note.process}</td>
         <td contenteditable="true" data-field="desire" data-type="int" class="td-center">${note.desire}</td>
         <td contenteditable="true" data-field="priority" data-type="int" class="td-center">${note.priority}</td>
-        <td contenteditable="true" data-field="content" data-type="string class="td-left"">${str2contenteditable(note.content)}</td>
+        <td contenteditable="true" data-field="content" data-type="string" class="td-left">${str2contenteditable(note.content)}</td>
       </tr>
     `);
         if (note.id == selectedId) tr.addClass('table-active');

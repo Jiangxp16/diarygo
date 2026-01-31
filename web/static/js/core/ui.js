@@ -43,8 +43,17 @@ function str2contenteditable(s) {
 }
 
 function contenteditable2str(s) {
-    return s.replace(/<div>/gi, '').replace(/<\/div>/gi, '\n').replace(/<br\s*\/?>/gi, '\n');
+    if (!s) return '';
+
+    return s
+        .replace(/<\/div>\s*<div>/gi, '\n')
+        .replace(/^<div>/i, '')
+        .replace(/<\/div>$/i, '')
+        .replace(/<\/?div>/gi, '\n')
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/\n{3,}/g, '\n\n');
 }
+
 
 function getEditorValue(el) {
   const $el = $(el);
