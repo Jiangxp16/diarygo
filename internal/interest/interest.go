@@ -72,5 +72,14 @@ func (r *Repository) Add(i *Interest) (*Interest, error) {
 	if i.Date == 0 {
 		i.Date = utils.GetCurrentYYYYMM()
 	}
+	if i.Score_DB == 0 {
+		i.Score_DB = -1
+	}
+	if i.Score_IMDB == 0 {
+		i.Score_IMDB = -1
+	}
+	if i.Score == 0 {
+		i.Score = -1
+	}
 	return r.BaseRepository.Add(i)
 }

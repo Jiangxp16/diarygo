@@ -64,18 +64,20 @@ $("#sport-table tbody").on("click", "tr", function () {
     $(this).addClass("table-active").siblings().removeClass("table-active");
 });
 
-function handleUpdate() {
-    const id = $(this).closest("tr").data("id");
-    const sport = list.find(n => n.id === id);
-    if (!sport) return;
-    const field = $(this).data("field");
-    const value = getEditorValue(this);
-    if (sport[field] === value) return;
-    sport[field] = value;
-    API.post('/api/sport/update', { id, [field]: value });
-}
+const updater = createPatchSaver({
+    getEntity: id => list.find(o => o.id === id),
+    save: (id, patch, done) => {
+        API.post('/api/sport/update', { ...patch, id }, () => {
+            done();
+        });
+    }
+});
 
-$("#sport-table tbody").on("blur", "td[contenteditable]", handleUpdate);
+$("#sport-table tbody")
+    .on("input", "td[contenteditable]", function () {
+        const { id, patch } = readTablePatch(this);
+        updater.update(id, patch);
+    })
 
 $("#btn-add").click(() => {
     API.post('/api/sport/add', {}, () => {
@@ -113,21 +115,9 @@ $("#btn-export").click(() => {
     window.location.href = `/api/sport/export`;
 });
 
-initTable("sport-table", sortState, updateView);
+applyNavConfig();
+initTable("sport-table", sortState, new Set(["date"]));
 applyState();
 loadNotes();
 addUnloadListener("sport", state)
 
-const noEnterFields = new Set([
-    "date",
-]);
-
-$("#sport-table tbody").on("keydown", "td[contenteditable]", function (e) {
-    if (e.key !== "Enter") return;
-
-    const field = $(this).data("field");
-    if (!noEnterFields.has(field)) return;
-
-    e.preventDefault();
-    this.blur();
-});

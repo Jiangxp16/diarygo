@@ -1,8 +1,5 @@
-let diaries = [];
+let list = [];
 let state = loadAppState("diary");
-const draftCache = new Map(); // key: yyyymmdd, value: {content, weather, location}
-let saveTimer = null;
-const SAVE_DELAY = 300;
 
 
 function applyState() {
@@ -15,13 +12,12 @@ function applyState() {
     }
 }
 
-
 function loadDiaries() {
     let d = new Date(state.date);
     let month = d.getMonth() + 1;
     let year = d.getFullYear()
     $.getJSON(`/api/diary/list?month=${month}&year=${year}`, function (data) {
-        diaries = data;
+        list = data;
         updateView();
     });
 }
@@ -35,7 +31,7 @@ function updateView() {
 }
 
 function updateWeatherAndLocation() {
-    const diary = diaries.find(d => d.id === date2int(state.date)) || { content: "", weather: "", location: "" };
+    const diary = list.find(d => d.id === date2int(state.date)) || { content: "", weather: "", location: "" };
     $('#le-weather').val(diary.weather);
     $('#le-location').val(diary.location);
 }
@@ -91,9 +87,9 @@ function renderDailyHeader(date) {
 
 function updateDailyView() {
     const date = new Date(state.date);
-    const diary = diaries.find(d => d.id === date2int(date)) || { content: "", weather: "", location: "" };
+    const diary = list.find(d => d.id === date2int(date)) || { content: "", weather: "", location: "" };
     $('#tw-header').html(`<th>${renderDailyHeader(date)}</th>`);
-    $('#tw-body').html(`<tr><td class="daily-cell"><div id="te-content"
+    $('#diary-table tbody').html(`<tr><td class="daily-cell"><div id="te-content"
                   class="daily-editor"
                   contenteditable="true"
                 >${str2contenteditable(diary.content)}</div></td></tr>`);
@@ -106,19 +102,16 @@ function renderCellDate(date) {
     const lunar = getLunarText(date);
     const holiday = getHolidayText(date);
     let html = `<div class="month-date-solar">${dayNum}</div>`;
-
     if (lunar) {
         html += `<div class="month-date-lunar">${lunar}</div>`;
     }
-
     if (holiday) {
         html += `<div class="month-date-holiday">${holiday}</div>`;
     }
     return html;
 }
 function updateMonthlyView() {
-    let dateStr = $('#date-picker').val();
-    let date = new Date(dateStr);
+    let date = new Date($('#date-picker').val());
     updateWeatherAndLocation()
 
     let year = date.getFullYear();
@@ -140,7 +133,7 @@ function updateMonthlyView() {
         html += '<tr>';
         for (let c = 0; c < 7; c++) {
             let id = date2int(day);
-            let diary = diaries.find(d => d.id === id) || { content: "", weather: "", location: "" };
+            let diary = list.find(d => d.id === id) || { content: "", weather: "", location: "" };
             let isCurrentMonth = day >= firstDate && day <= lastDate;
             let cellDateHtml = renderCellDate(day);
             if (isCurrentMonth) {
@@ -160,10 +153,9 @@ function updateMonthlyView() {
         html += '</tr>';
     }
 
-    $('#tw-body').html(html);
+    $('#diary-table tbody').html(html);
 }
 
-// -------------------- 事件绑定 --------------------
 $('#date-picker').change(function () {
     let previous = state.date
     let current = $('#date-picker').val()
@@ -206,7 +198,7 @@ $('#btn-monthly').click(() => {
 });
 
 
-$('#tw-content').on('click', '.month-active', function () {
+$('#diary-table').on('click', '.month-active', function () {
     let id = $(this).data('date'); // yyyymmdd
     let y = id.toString().substring(0, 4);
     let m = id.toString().substring(4, 6);
@@ -218,12 +210,11 @@ $('#tw-content').on('click', '.month-active', function () {
     updateWeatherAndLocation();
 });
 
-function getDiaryByDate(dateStr) {
-    const id = date2int(dateStr);
-    let diary = diaries.find(d => d.id === id);
+function getDiaryByID(id) {
+    let diary = list.find(d => d.id === id);
     if (!diary) {
         diary = { id, content: "", weather: "", location: "" };
-        diaries.push(diary);
+        list.push(diary);
     }
     return diary;
 }
@@ -248,74 +239,34 @@ function readCurrentEditor() {
     };
 }
 
-function shallowEqual(a, b) {
-    return a &&
-        b &&
-        a.content === b.content &&
-        a.weather === b.weather &&
-        a.location === b.location;
-}
+const updater = createAutoSaver({
+  getEntity: getDiaryByID,
+  readCurrent: () => readCurrentEditor(),
+  save: (id, data, done) => {
+    API.post('/api/diary/update', { id, ...data }, done);
+  }
+});
 
-function updateDraft(dateStr) {
-    const diary = getDiaryByDate(dateStr);
-    const current = readCurrentEditor();
-    if (
-        diary.content === current.content &&
-        diary.weather === current.weather &&
-        diary.location === current.location
-    ) {
-        draftCache.delete(dateStr);
-        return;
-    }
-    draftCache.set(dateStr, current);
-    scheduleSave(dateStr);
-}
 
-function scheduleSave(dateStr) {
-    if (saveTimer) clearTimeout(saveTimer);
-
-    saveTimer = setTimeout(() => {
-        saveTimer = null;
-        saveDraft(dateStr);
-    }, SAVE_DELAY);
-}
-
-function saveDraft(dateStr) {
-    const draft = draftCache.get(dateStr);
-    if (!draft) return;
-    const diary = getDiaryByDate(dateStr);
-    API.post('/api/diary/update', {
-        id: diary.id,
-        content: draft.content,
-        weather: draft.weather,
-        location: draft.location,
-    }, () => {
-        diary.content = draft.content;
-        diary.weather = draft.weather;
-        diary.location = draft.location;
-        draftCache.delete(dateStr);
-        console.log('Saved', dateStr);
-    });
-}
-
-$('#tw-body').on('input', '[contenteditable]', function () {
-    updateDraft(state.date);
+$('#diary-table tbody').on('input', '[contenteditable]', function () {
+    updater.update(date2int(state.date));
 });
 
 $('#le-weather, #le-location').on('input', function () {
-    updateDraft(state.date);
+    updater.update(date2int(state.date));
 });
 
 $('#le-weather, #le-location').on('keydown', function (e) {
     if (e.key === 'Enter') {
         e.preventDefault();
-        updateDraft(state.date);
+        updater.update(date2int(state.date));
         this.blur();
     }
 });
 
 
-applyState();    // 1. 加载页面状态
-loadDiaries();   // 2. 加载数据
-updateView();    // 3. 渲染视图
+applyNavConfig();
+applyState();
+setPastePlain("diary-table")
+loadDiaries();
 addUnloadListener("diary", state)

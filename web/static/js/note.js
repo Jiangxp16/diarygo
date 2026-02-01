@@ -70,18 +70,20 @@ $("#note-table tbody").on("click", "tr", function () {
     $(this).addClass("table-active").siblings().removeClass("table-active");
 });
 
-function handleUpdate() {
-    const id = $(this).closest("tr").data("id");
-    const note = list.find(n => n.id === id);
-    if (!note) return;
-    const field = $(this).data("field");
-    const value = getEditorValue(this);
-    if (note[field] === value) return;
-    note[field] = value;
-    API.post('/api/note/update', { id, [field]: value });
-}
+const updater = createPatchSaver({
+    getEntity: id => list.find(o => o.id === id),
+    save: (id, patch, done) => {
+        API.post('/api/note/update', { ...patch, id }, () => {
+            done();
+        });
+    }
+});
 
-$("#note-table tbody").on("blur", "td[contenteditable]", handleUpdate);
+$("#note-table tbody")
+    .on("input", "td[contenteditable]", function () {
+        const { id, patch } = readTablePatch(this);
+        updater.update(id, patch);
+    })
 
 $("#btn-add").click(() => {
     API.post('/api/note/add', {}, () => {
@@ -115,29 +117,12 @@ $("#importFile").change(function () {
     });
 });
 
-$("#btn-expprt").click(() => {
+$("#btn-export").click(() => {
     window.location.href = `/api/note/export`;
 });
 
-initTable("note-table", sortState, updateView);
+applyNavConfig();
+initTable("note-table", sortState, new Set(["begin", "last", "progress", "desire", "priority"]));
 applyState();
 loadNotes();
 addUnloadListener("note", state)
-
-const noEnterFields = new Set([
-    "begin",
-    "last",
-    "progress",
-    "desire",
-    "priority",
-]);
-
-$("#note-table tbody").on("keydown", "td[contenteditable]", function (e) {
-    if (e.key !== "Enter") return;
-
-    const field = $(this).data("field");
-    if (!noEnterFields.has(field)) return;
-
-    e.preventDefault();
-    this.blur();
-});

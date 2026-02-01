@@ -164,22 +164,25 @@ $("#bill-table tbody").on("click", "tr", function () {
   $(this).addClass("table-active").siblings().removeClass("table-active");
 });
 
-function handleUpdate() {
-  const id = $(this).closest("tr").data("id");
-  const bill = list.find(b => b.id === id);
-  if (!bill) return;
-  const field = $(this).data("field");
-  const value = getEditorValue(this);
-  if (bill[field] === value) return;
-  bill[field] = value;
-  API.post("/api/bill/update", { id, [field]: value });
-  updateTotal();
-}
+const updater = createPatchSaver({
+  getEntity: id => list.find(o => o.id === id),
+  save: (id, patch, done) => {
+    API.post('/api/bill/update', { ...patch, id }, () => {
+      done();
+      updateTotal();
+    });
+  }
+});
 
 $("#bill-table tbody")
-  .on("change", ".inout-select", handleUpdate)
-  .on("blur", "td[contenteditable]", handleUpdate);
-
+  .on("input", "td[contenteditable]", function () {
+    const { id, patch } = readTablePatch(this);
+    updater.update(id, patch);
+  })
+  .on("change", ".inout-select", function () {
+    const { id, patch } = readTablePatch(this);
+    updater.update(id, patch);
+  });
 
 $('#btn-add').click(() => {
   API.post('/api/bill/add', {}, loadBills);
@@ -194,17 +197,16 @@ $("#btn-del").on("click", function () {
   });
 });
 
-
 $('#btn-import').click(() => $('#importFile').click());
 $('#importFile').change(function () {
   if (!this.files.length) return;
   let form = new FormData();
   form.append("file", this.files[0]);
   API.upload('/api/bill/import', form, () => {
-      loadBills();
-      showSuccess('Import successful');
-      this.value = "";
-    });
+    loadBills();
+    showSuccess('Import successful');
+    this.value = "";
+  });
 });
 
 $('#btn-export').click(() => {
@@ -212,24 +214,8 @@ $('#btn-export').click(() => {
 });
 
 
-initTable("bill-table", sortState, updateView);
+applyNavConfig();
+initTable("bill-table", sortState, "all");
 applyState();
 loadBills();
 addUnloadListener("bill", state)
-
-// 1. 粘贴时只允许纯文本
-$("#bill-table tbody").on("paste", "td[contenteditable]", function (e) {
-    e.preventDefault();
-    const text = (e.originalEvent || e)
-        .clipboardData
-        .getData("text/plain");
-    document.execCommand("insertText", false, text);
-});
-
-// 2. 禁止回车
-$("#bill-table tbody").on("keydown", "td[contenteditable]", function (e) {
-    if (e.key === "Enter") {
-        e.preventDefault();
-        this.blur();
-    }
-});

@@ -10,7 +10,6 @@ function enableColumnResize(tableId) {
   const ths = table.querySelectorAll("thead th");
 
   ths.forEach((th, index) => {
-    // 第 0 列没有左分隔线，直接跳过
     if (index === 0) return;
 
     if (th.querySelector(".col-resizer")) return;
@@ -58,7 +57,6 @@ function initColGroup(tableId) {
   const table = document.getElementById(tableId);
   if (!table) return;
 
-  // 已存在就不重复加
   if (table.querySelector("colgroup")) return;
 
   const thead = table.querySelector("thead");
@@ -100,11 +98,10 @@ function restoreColWidths(tableId) {
   });
 }
 
-function enableTableSort(tableSelector, sortState, onSortChange) {
+function enableTableSort(tableSelector, sortState) {
   const $thead = $(`${tableSelector} thead`);
 
   $thead.on("click", "th.sortable", function (e) {
-    // ⭐ 屏蔽列宽拖拽手柄
     if (e.target.closest(".col-resizer")) return;
 
     const key = $(this).data("key");
@@ -124,13 +121,44 @@ function enableTableSort(tableSelector, sortState, onSortChange) {
       }
     }
 
-    onSortChange && onSortChange(sortState);
+    updateView();
   });
 }
 
-function initTable(tabelId, sortState, onSortChange) {
-    enableTableSort('#'+tabelId, sortState, onSortChange);
-    initColGroup(tabelId)
-    restoreColWidths(tabelId)
-    enableColumnResize(tabelId)
+function setPastePlain(tableId) {
+  const $tableBody = $(`#${tableId} tbody`);
+  $tableBody.on("paste", "[contenteditable]", function (e) {
+    e.preventDefault();
+    const text = (e.originalEvent || e).clipboardData.getData("text/plain");
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+    selection.deleteFromDocument();
+    selection.getRangeAt(0).insertNode(document.createTextNode(text));
+    selection.collapseToEnd();
+  });
+}
+
+function disableEnterKey(tableId, fields) {
+  const $tableBody = $(`#${tableId} tbody`);
+  $tableBody.on("keydown", "[contenteditable]", function (e) {
+    if (e.key !== "Enter") return;
+    const field = $(this).data("field");
+    if (fields==="all" || fields.has(field)){
+      e.preventDefault();
+      this.blur();
+    }
+  });
+}
+
+function initTable(tableId, sortState, fieldsToDisableEnter=null) {
+    if (sortState) {
+      enableTableSort('#'+tableId, sortState);
+    }
+    initColGroup(tableId)
+    restoreColWidths(tableId)
+    enableColumnResize(tableId)
+    setPastePlain(tableId)
+    if (fieldsToDisableEnter) {
+        disableEnterKey(tableId, fieldsToDisableEnter)
+    }
 }

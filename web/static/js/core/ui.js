@@ -3,7 +3,9 @@ const APP_KEY = 'diarygo_state';
 const VIEW_DAILY = 0;
 const VIEW_MONTHLY = 1;
 const WEEK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const INTEREST_SORTS = ["All","Movie","TV","Comic","Game","Book","Music","Others"]
+const INTEREST_SORTS = ["All", "Movie", "TV", "Comic", "Game", "Book", "Music", "Others"]
+const SAVE_DELAY = 500;
+
 window.appState = {
     diary: {
         view: VIEW_DAILY,
@@ -26,16 +28,16 @@ window.appState = {
 }
 
 function castValue(value, type) {
-  switch (type) {
-    case "int":
-      return parseInt(value, 10);
-    case "float":
-      return parseFloat(value);
-    case "bool":
-      return value === "true" || value === "1";
-    default:
-      return value;
-  }
+    switch (type) {
+        case "int":
+            return parseInt(value, 10);
+        case "float":
+            return parseFloat(value);
+        case "bool":
+            return value === "true" || value === "1";
+        default:
+            return value;
+    }
 }
 
 function str2contenteditable(s) {
@@ -56,16 +58,13 @@ function contenteditable2str(s) {
 
 
 function getEditorValue(el) {
-  const $el = $(el);
-  const type = $el.data('type')
-
-  if ($el.is("select, input, textarea")) {
-    return castValue($el.val(), type);
-  }
-
-  if ($el.is("[contenteditable]")) {
-        if(type === "string") {
-            // 把 <br> 和 <div> 换行转成 \n
+    const $el = $(el);
+    const type = $el.data('type')
+    if ($el.is("select, input, textarea")) {
+        return castValue($el.val(), type);
+    }
+    if ($el.is("[contenteditable]")) {
+        if (type === "string") {
             let html = $el.html();
             html = contenteditable2str(html)
             return castValue(html.trim(), type);
@@ -73,8 +72,7 @@ function getEditorValue(el) {
             return castValue($el.text().trim(), type);
         }
     }
-
-  return null;
+    return null;
 }
 
 function date2int(dateInput) {
@@ -86,9 +84,9 @@ function date2int(dateInput) {
     } else {
         d = new Date();
     }
-    return d.getFullYear()*10000 + (d.getMonth()+1)*100 + d.getDate();
+    return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
 }
-// 工具函数：把 Date 或 yyyy-mm-dd 字符串 转为 "yyyyMMdd" 字符串
+
 function date2str(dateInput) {
     let d;
     if (typeof dateInput === 'string') {
@@ -104,16 +102,15 @@ function date2str(dateInput) {
     return `${y}${m}${day}`;
 }
 
-// 反向： "yyyyMMdd" → Date 对象
 function str2date(idStr) {
     if (!/^\d{8}$/.test(idStr)) return null;
-    const y = parseInt(idStr.substring(0,4));
-    const m = parseInt(idStr.substring(4,6)) - 1;
-    const d = parseInt(idStr.substring(6,8));
+    const y = parseInt(idStr.substring(0, 4));
+    const m = parseInt(idStr.substring(4, 6)) - 1;
+    const d = parseInt(idStr.substring(6, 8));
     return new Date(y, m, d);
 }
 
-function showMsg(message, type = 'danger', delay = 3000, redirect=null) {
+function showMsg(message, type = 'danger', delay = 3000, redirect = null) {
     const infoBox = document.getElementById('info-box');
 
     infoBox.classList.remove('alert-danger', 'alert-success', 'alert-warning', 'alert-info', 'alert-primary');
@@ -139,7 +136,7 @@ function showError(msg, delay = 5000) {
     showMsg(msg, 'danger', delay);
 }
 
-function showErrorAndRedirect(msg, delay = 5000, redirect="/") {
+function showErrorAndRedirect(msg, delay = 5000, redirect = "/") {
     showMsg(msg, 'danger', delay, redirect);
 }
 
@@ -197,7 +194,7 @@ function loadAppState(module) {
     if (saved) {
         try {
             Object.assign(window.appState, JSON.parse(saved));
-        } catch {}
+        } catch { }
     }
     return window.appState[module]
 }
@@ -216,8 +213,8 @@ function saveAppState(module, state) {
     localStorage.setItem(APP_KEY, JSON.stringify(fullState));
 }
 
-function addUnloadListener(module, state, fn=null) {
-    window.addEventListener('beforeunload', ()=>{
+function addUnloadListener(module, state, fn = null) {
+    window.addEventListener('beforeunload', () => {
         if (fn !== null) { fn() }
         saveAppState(module, state);
     })
@@ -256,6 +253,107 @@ function serializeValue(val) {
     return String(val);
 }
 
-$(function () {
-    applyNavConfig();
-});
+function shallowEqual(a, b) {
+    if (a === b) return true;
+    if (!a || !b) return false;
+
+    const aKeys = Object.keys(a);
+    const bKeys = Object.keys(b);
+
+    if (aKeys.length !== bKeys.length) return false;
+
+    return aKeys.every(k => a[k] === b[k]);
+}
+
+function shallowEqualCommon(a, b) {
+    if (!a || !b) return false;
+    const commonKeys = Object.keys(a).filter(k =>
+        Object.prototype.hasOwnProperty.call(b, k)
+    );
+    return commonKeys.every(k => a[k] === b[k]);
+}
+
+function createAutoSaver({ getEntity, readCurrent, save }) {
+    const draftCache = new Map();
+    let timer = null;
+
+    function update(id) {
+        const entity = getEntity(id);
+        const current = readCurrent();
+
+        if (shallowEqualCommon(entity, current)) {
+            draftCache.delete(id);
+            return;
+        }
+
+        draftCache.set(id, current);
+
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(() => {
+            timer = null;
+            const draft = draftCache.get(id);
+            if (!draft) return;
+            save(id, draft, () => {
+                Object.assign(entity, draft);
+                draftCache.delete(id);
+                console.log('Saved', id);
+            });
+        }, SAVE_DELAY);
+    }
+
+    return { update };
+}
+
+function createPatchSaver({
+    getEntity,   // id => persisted object
+    save        // (id, patch, done) => void
+}) {
+    const draftCache = new Map();
+    let timer = null;
+
+    function update(id, patch) {
+        if (!patch || typeof patch !== 'object') return;
+
+        const entity = getEntity(id);
+        if (!entity) return;
+
+        let draft = draftCache.get(id) || {};
+
+        Object.assign(draft, patch);
+
+        for (const k in patch) {
+            if (entity[k] === patch[k]) {
+                delete draft[k];
+            }
+        }
+
+        if (Object.keys(draft).length === 0) {
+            draftCache.delete(id);
+            return;
+        }
+
+        draftCache.set(id, draft);
+
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(() => {
+            timer = null;
+            const data = draftCache.get(id);
+            if (!data) return;
+
+            save(id, data, () => {
+                Object.assign(entity, data);
+                draftCache.delete(id);
+                console.log('Saved', id);
+            });
+        }, SAVE_DELAY);
+    }
+
+    return { update };
+}
+
+function readTablePatch(el) {
+  return {
+    id: $(el).closest("tr").data("id"),
+    patch: { [$(el).data("field")]: getEditorValue(el) }
+  };
+}

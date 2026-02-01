@@ -86,26 +86,30 @@ $("#interest-table tbody").on("click", "tr", function () {
     $(this).addClass("table-active").siblings().removeClass("table-active");
 });
 
-function handleUpdate() {
-    const id = $(this).closest("tr").data("id");
-    const interest = list.find(i => i.id === id)
-    if (!interest) return;
-    const field = $(this).data("field");
-    const value = getEditorValue(this);
-    if (interest[field] === value) return;
-    interest[field] = value;
-    API.post("/api/interest/update", { id, [field]: value });
-}
-$("#interest-table tbody")
-    .on("change", ".sort-select", handleUpdate)
-    .on("blur", "td[contenteditable]", handleUpdate);
+const updater = createPatchSaver({
+    getEntity: id => list.find(o => o.id === id),
+    save: (id, patch, done) => {
+        API.post('/api/interest/update', { ...patch, id }, () => {
+            done();
+        });
+    }
+});
 
+$("#interest-table tbody")
+    .on("input", "td[contenteditable]", function () {
+        const { id, patch } = readTablePatch(this);
+        updater.update(id, patch);
+    })
+    .on("change", ".inout-select", function () {
+        const { id, patch } = readTablePatch(this);
+        updater.update(id, patch);
+    });
 
 $("#btn-add").click(() => {
     API.post("/api/interest/add", { sort: state.sort }, loadInterests);
 });
 
-$("#btn-del").click(async function() {
+$("#btn-del").click(async function () {
     if (!selectedId) return;
     const ok = await showConfirm(
         I18N["Delete selected record?"],
@@ -137,24 +141,8 @@ $("#btn-export").click(() => {
 });
 
 
-initTable("interest-table", sortState, updateView);
+applyNavConfig();
+initTable("interest-table", sortState, "all");
 applyState();
 loadInterests();
 addUnloadListener("interest", state)
-
-// 1. 粘贴时只允许纯文本
-$("#interest-table tbody").on("paste", "td[contenteditable]", function (e) {
-    e.preventDefault();
-    const text = (e.originalEvent || e)
-        .clipboardData
-        .getData("text/plain");
-    document.execCommand("insertText", false, text);
-});
-
-// 2. 禁止回车
-$("#interest-table tbody").on("keydown", "td[contenteditable]", function (e) {
-    if (e.key === "Enter") {
-        e.preventDefault();
-        this.blur();
-    }
-});

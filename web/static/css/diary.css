@@ -1,5 +1,5 @@
 /* ========= 通用 ========= */
-#tw-content td {
+#diary-table td {
     vertical-align: top;
     white-space: pre-wrap;      /* 关键：保留换行 */
     word-break: break-word;
@@ -94,13 +94,13 @@
     color: #888;
     margin-top: 2px;
 }
-#tw-content {
+#diary-table {
     table-layout: fixed;
     width: 100%;
 }
 
-#tw-content th,
-#tw-content td {
+#diary-table th,
+#diary-table td {
     width: calc(100% / 7);
     padding: 0;
 }

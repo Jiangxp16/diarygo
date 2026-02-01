@@ -96,3 +96,5 @@ $('#passwordForm').on('submit', async function (e) {
         }, 800);
     });
 });
+
+applyNavConfig();
