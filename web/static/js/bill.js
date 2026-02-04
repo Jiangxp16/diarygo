@@ -47,7 +47,7 @@ function applyFilter() {
     return;
   }
 
-  const f = currentFilter.trim();
+  const f = currentFilter.trim().toLowerCase();
   let lessThan = null;
   let moreThan = null;
 
@@ -64,9 +64,16 @@ function applyFilter() {
     if (moreThan !== null) {
       return bill.amount >= moreThan;
     }
-    return (
-      (bill.date + bill.type + bill.item).toLowerCase().includes(f.toLowerCase())
-    );
+    const inoutText = bill.inout > 0 ? I18N["In"] :
+      bill.inout < 0 ? I18N["Out"] : "";
+
+    const searchable = (String(bill.date) + bill.type + bill.item +
+      String(bill.amount) + inoutText).toLowerCase();
+
+    return searchable.includes(f);
+    //return (
+    //  (bill.date + bill.type + bill.item).toLowerCase().includes(f)
+    //);
   });
 }
 

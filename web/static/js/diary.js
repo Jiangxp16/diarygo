@@ -32,8 +32,8 @@ function updateView() {
 
 function updateWeatherAndLocation() {
     const diary = list.find(d => d.id === date2int(state.date)) || { content: "", weather: "", location: "" };
-    $('#le-weather').val(diary.weather);
-    $('#le-location').val(diary.location);
+    $('#input-weather').val(diary.weather);
+    $('#input-location').val(diary.location);
 }
 
 function getLunarText(date, withMonth = false) {
@@ -88,7 +88,7 @@ function renderDailyHeader(date) {
 function updateDailyView() {
     const date = new Date(state.date);
     const diary = list.find(d => d.id === date2int(date)) || { content: "", weather: "", location: "" };
-    $('#tw-header').html(`<th>${renderDailyHeader(date)}</th>`);
+    $('#diary-table thead tr').html(`<th>${renderDailyHeader(date)}</th>`);
     $('#diary-table tbody').html(`<tr><td class="daily-cell"><div id="te-content"
                   class="daily-editor"
                   contenteditable="true"
@@ -123,7 +123,7 @@ function updateMonthlyView() {
     let firstDayOfWeek = APP_CONFIG.first_day_of_week % 7; // 默认为周一
     let headers = WEEK_DAYS.slice(firstDayOfWeek - 1)
         .concat(WEEK_DAYS.slice(0, firstDayOfWeek - 1));
-    $('#tw-header').html(headers.map(d => `<th>${I18N[d] || d}</th>`).join(''));
+    $('#diary-table thead tr').html(headers.map(d => `<th>${I18N[d] || d}</th>`).join(''));
 
     let html = '';
     let day = new Date(firstDate);
@@ -234,8 +234,8 @@ function getCurrentContent() {
 function readCurrentEditor() {
     return {
         content: getCurrentContent(),
-        weather: $('#le-weather').val().trim(),
-        location: $('#le-location').val().trim(),
+        weather: $('#input-weather').val().trim(),
+        location: $('#input-location').val().trim(),
     };
 }
 
@@ -252,11 +252,11 @@ $('#diary-table tbody').on('input', '[contenteditable]', function () {
     updater.update(date2int(state.date));
 });
 
-$('#le-weather, #le-location').on('input', function () {
+$('#input-weather, #input-location').on('input', function () {
     updater.update(date2int(state.date));
 });
 
-$('#le-weather, #le-location').on('keydown', function (e) {
+$('#input-weather, #input-location').on('keydown', function (e) {
     if (e.key === 'Enter') {
         e.preventDefault();
         updater.update(date2int(state.date));

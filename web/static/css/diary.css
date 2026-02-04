@@ -1,14 +1,32 @@
+#diary-table {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+  min-width: 100%;
+  margin-bottom: 1rem;
+  color: #212529;
+  vertical-align: middle;
+  border-color: #dee2e6;
+  border-collapse: separate;
+  border-spacing: 1px;
+  background-color: #ffffff;
+}
+
+#diary-table th {
+    text-align: center;
+    vertical-align: middle;
+    border: 1px solid #dee2e6;
+    border-spacing: 1px;
+}
+
 /* ========= 通用 ========= */
 #diary-table td {
     vertical-align: top;
-    white-space: pre-wrap;      /* 关键：保留换行 */
+    white-space: pre-wrap;
     word-break: break-word;
     line-height: 1.4;
-}
-
-.button-container {
-    display: flex;
-    flex-direction: row;
+    border: 1px solid #dee2e6;
+    border-spacing: 1px;
 }
 
 /* ========= Daily View ========= */
@@ -20,7 +38,6 @@
     text-align: left;
 }
 
-/* 用 div 模拟 textarea */
 .daily-editor {
     min-height: 360px;
     width: 100%;
@@ -29,21 +46,16 @@
     white-space: pre-wrap;
 }
 
-.daily-header {
-    padding: 6px;
-}
-
-.daily-date-solar{
+.daily-date-solar {
     font-size: 16px;
     font-weight: bold;
 }
 
-.daily-date-lunar{
+.daily-date-lunar {
     font-size: 12px;
     color: #888;
     margin-top: 2px;
 }
-
 
 /* ========= Monthly View ========= */
 .month-cell {
@@ -51,6 +63,15 @@
     padding: 4px;
     height: 150px;
     position: relative;
+}
+
+.month-active {
+    background-color: #fff;
+    cursor: pointer;
+}
+
+.month-active:hover {
+    background-color: #f8f9fa;
 }
 
 .cell-date {
@@ -65,7 +86,6 @@
 }
 
 .cell-content {
-    flex: 1 1 auto;
     text-align: left;
     min-height: 135px;
     max-height: 135px;
@@ -75,6 +95,7 @@
     word-break: break-word;
     outline: none;
 }
+
 .cell-content:empty::before {
     content: " ";
     white-space: pre;
@@ -85,15 +106,18 @@
     color: #aaa;
 }
 
-.month-date-solar{
+.month-date-solar {
     font-size: 16px;
     font-weight: bold;
 }
-.month-date-lunar{
+
+.month-date-lunar {
     font-size: 12px;
     color: #888;
     margin-top: 2px;
 }
+
+/* ========= Table ========= */
 #diary-table {
     table-layout: fixed;
     width: 100%;
@@ -103,4 +127,31 @@
 #diary-table td {
     width: calc(100% / 7);
     padding: 0;
+}
+
+/* ========= Buttons ========= */
+#btn-daily {
+    background-color: #198754;
+    border-color: #198754;
+    color: #fff;
+}
+
+#btn-daily:hover {
+    background-color: #157347;
+}
+
+#btn-monthly {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: #fff;
+}
+
+#btn-monthly:hover {
+    background-color: #bb2d3b;
+}
+
+/* ========= Inputs ========= */
+#input-weather,
+#input-location {
+    width: 150px;
 }

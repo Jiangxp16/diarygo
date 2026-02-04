@@ -28,13 +28,26 @@ window.appState = {
 }
 
 function castValue(value, type) {
+    if (value == null) return undefined;
+
     switch (type) {
+        case "string":
+            return String(value);
+
         case "int":
+            if (value === "") return undefined;
+            if (!/^-?\d+$/.test(value)) return undefined;
             return parseInt(value, 10);
+
         case "float":
+            if (value === "") return undefined;
+            if (!/^-?\d*(\.\d+)?$/.test(value)) return undefined;
+            if (value === "-" || value === "." || value === "-.") return undefined;
             return parseFloat(value);
+
         case "bool":
             return value === "true" || value === "1";
+
         default:
             return value;
     }
@@ -56,24 +69,30 @@ function contenteditable2str(s) {
         .replace(/\n{3,}/g, '\n\n');
 }
 
-
 function getEditorValue(el) {
     const $el = $(el);
-    const type = $el.data('type')
+    const type = $el.data('type');
+    let raw;
+
     if ($el.is("select, input, textarea")) {
-        return castValue($el.val(), type);
-    }
-    if ($el.is("[contenteditable]")) {
+        raw = $el.val();
+    } else if ($el.is("[contenteditable]")) {
         if (type === "string") {
-            let html = $el.html();
-            html = contenteditable2str(html)
-            return castValue(html.trim(), type);
+            raw = contenteditable2str($el.html()).trim();
         } else {
-            return castValue($el.text().trim(), type);
+            raw = $el.text().trim();
         }
+    } else {
+        return null;
     }
-    return null;
+
+    const casted = castValue(raw, type);
+
+    if (casted === undefined) return null;
+
+    return casted;
 }
+
 
 function date2int(dateInput) {
     let d;
@@ -322,7 +341,7 @@ function createPatchSaver({
         Object.assign(draft, patch);
 
         for (const k in patch) {
-            if (entity[k] === patch[k]) {
+            if (patch[k] == null || entity[k] === patch[k]) {
                 delete draft[k];
             }
         }
@@ -339,9 +358,10 @@ function createPatchSaver({
             timer = null;
             const data = draftCache.get(id);
             if (!data) return;
+            const snapshot = { ...data };
 
-            save(id, data, () => {
-                Object.assign(entity, data);
+            save(id, snapshot, () => {
+                Object.assign(entity, snapshot);
                 draftCache.delete(id);
                 console.log('Saved', id);
             });
@@ -349,11 +369,4 @@ function createPatchSaver({
     }
 
     return { update };
-}
-
-function readTablePatch(el) {
-  return {
-    id: $(el).closest("tr").data("id"),
-    patch: { [$(el).data("field")]: getEditorValue(el) }
-  };
 }

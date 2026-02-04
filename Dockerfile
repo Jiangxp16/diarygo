@@ -1,12 +1,8 @@
 # ----------------------------
-# 1. 构建阶段
-# ----------------------------
 FROM golang:1.25.6-alpine AS builder
 
-# 安装 git 等必要工具
 RUN apk add --no-cache git
 
-# 设置工作目录
 WORKDIR /app
 
 COPY go.mod go.sum ./

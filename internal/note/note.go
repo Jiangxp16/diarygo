@@ -47,5 +47,5 @@ func (r *Repository) Add(n *Note) (*Note, error) {
 }
 
 func (r *Repository) List() ([]*Note, error) {
-	return r.GetList("ORDER BY begin DESC")
+	return r.GetList("ORDER BY last DESC")
 }

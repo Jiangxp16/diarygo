@@ -1,29 +1,46 @@
 .table-container {
-  max-height: 1000px; /* 表格最大高度，可调 */
-  overflow-x: auto;  /* 超出内容显示纵向滚动条 */
-  overflow-y: auto;  /* 超出内容显示纵向滚动条 */
-  position: relative; /* 新增：为容器添加相对定位，建立独立的层叠上下文，避免外部干扰 */
+  max-height: 1000px;
+  overflow-x: auto;
+  overflow-y: auto;
+  position: relative;
   min-width: 0;
   width: 100%;
   max-width: none;
+  padding: 6px;
+}
+
+.table-container col:last-child {
+  width: auto !important;
+  min-width: 200px;
 }
 
 .table-container table {
-  min-width: 100%;
+  display: table;
   table-layout: fixed;
+  width: 100%;
+  min-width: 100%;
+  margin-bottom: 1rem;
+  color: #212529;
+  vertical-align: middle;
+  border-color: #dee2e6;
   border-collapse: separate;
   border-spacing: 0;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  background-color: #ffffff;
 }
 
 .table-container th,
 .table-container td {
+  border: 1px solid #dee2e6;
   min-width: 0;
-  white-space: nowrap;
+  white-space: normal;
   overflow: auto;
   scrollbar-width: none;
   text-overflow: auto;
   box-sizing: border-box;
   vertical-align: middle;
+  padding: 10px;
 }
 
 .table-container th {
@@ -38,6 +55,12 @@
   height: 100%;
   cursor: col-resize;
   user-select: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.table-container th:hover .col-resizer {
+  opacity: 1;
 }
 
 .table-container thead {
@@ -50,10 +73,17 @@
 .table-container thead th {
   background-color: #f8f9fa;
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+  border-bottom: 1.5px solid #cfd4da;
+  border-left: 1px solid #e6e9ec;
+  border-right: 1px solid #e6e9ec;
 }
 
 .table-container tbody tr td {
   border-bottom: 1.5px solid #bfc5cc;
+}
+
+.table-container tbody tr:hover td {
+  background-color: #f8f9fb;
 }
 
 .td-center {
@@ -80,4 +110,33 @@
   padding-right: 1rem;
   background-position: right 0.25rem center;
   min-width: 0;
+}
+
+th.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+th.sortable:hover {
+    background-color: #f5f5f5;
+}
+
+th.sortable.active {
+  background-color: #e9ecef;
+}
+
+th.sortable.asc::after {
+  content: "▲";
+  font-size: 10px;
+  margin-left: 6px;
+}
+
+th.sortable.desc::after {
+  content: "▼";
+  font-size: 10px;
+  margin-left: 6px;
+}
+
+.table-container tbody tr.table-active {
+  box-shadow: inset 3px 0 0 #0d6efd;
 }

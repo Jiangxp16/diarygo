@@ -10,27 +10,27 @@
 
 <div class="div-container">
     <div class="div-container">
-        <button id="btn-import" class="btn btn-sm btn-info">{{ t "Import" }}</button>
-        <button id="btn-export" class="btn btn-sm btn-warning">{{ t "Export" }}</button>
+        <button id="btn-import">{{ t "Import" }}</button>
+        <button id="btn-export">{{ t "Export" }}</button>
         <input type="file" id="importFile" accept=".xlsx" hidden>
     </div>
 
     <div class="ms-auto div-container">
-        <input type="text" id="filter" class="form-control form-control-sm" style="width:200px;" placeholder="{{ t "Search..." }}">
-        <button id="btn-add" class="btn btn-sm btn-success">{{ t "Add" }}</button>
-        <button id="btn-del" class="btn btn-sm btn-danger">{{ t "Del" }}</button>
+        <input type="text" id="filter" placeholder="{{ t "Search..." }}">
+        <button id="btn-add">{{ t "Add" }}</button>
+        <button id="btn-del">{{ t "Del" }}</button>
     </div>
 </div>
 
 <br>
 
 <div class="table-container">
-    <table class="table table-sm table-bordered" id="sport-table">
-        <thead class="table-light">
+    <table id="sport-table">
+        <thead>
             <tr>
                 <th style="display:none">ID</th>
                 <th class="sortable th-center" data-key="date">{{ t "Date" }}</th>
-                <th class="sortable th-center" data-key="content">{{ t "Content" }}</th>
+                <th class="sortable th-left" data-key="content">{{ t "Content" }}</th>
             </tr>
         </thead>
         <tbody></tbody>

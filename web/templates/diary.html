@@ -10,27 +10,27 @@
 <div class="div-container">
     <div class="div-container">
         <input type="file" id="import-file" accept=".xlsx" style="display:none;">
-        <button id="btn-import" class="btn btn-info btn-sm">{{ t "Import" }}</button>
-        <button id="btn-export" class="btn btn-warning btn-sm">{{ t "Export" }}</button>
+        <button id="btn-import">{{ t "Import" }}</button>
+        <button id="btn-export">{{ t "Export" }}</button>
     </div>
     <div class="ms-auto div-container">
+        <button id="btn-daily">{{ t "Daily" }}</button>
+        <button id="btn-monthly">{{ t "Monthly"}}</button>
     </div>
 </div>
 
 <div class="div-container">
     <div class="div-container">
-        <button id="btn-daily" class="btn btn-primary btn-sm">{{ t "Daily" }}</button>
-        <button id="btn-monthly" class="btn btn-primary btn-sm">{{ t "Monthly"}}</button>
     </div>
-    <div class="div-container">
+    <div class="ms-auto div-container">
         <input type="date" id="date-picker" class="form-control form-control-sm d-inline-block date-picker">
-        <input type="text" id="le-weather" class="form-control form-control-sm d-inline-block line-input" placeholder="{{ t "Weather" }}">
-        <input type="text" id="le-location" class="form-control form-control-sm d-inline-block line-input" placeholder="{{ t "Location" }}">
+        <input type="text" id="input-weather" placeholder="{{ t "Weather" }}">
+        <input type="text" id="input-location" placeholder="{{ t "Location" }}">
     </div>
 </div>
 
-<table id="diary-table" class="table table-bordered table-sm text-center">
-    <thead><tr id="tw-header"></tr></thead>
+<table id="diary-table">
+    <thead><tr></tr></thead>
     <tbody></tbody>
 </table>
 

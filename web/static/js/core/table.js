@@ -1,3 +1,13 @@
+function getVisibleThs(table) {
+  return [...table.querySelectorAll("thead th")]
+    .filter(th => th.offsetParent !== null);
+}
+
+function getVisibleCols(table) {
+  return [...table.querySelectorAll("colgroup col")]
+    .filter(col => col.style.display !== "none");
+}
+
 
 function enableColumnResize(tableId) {
   const table = document.getElementById(tableId);
@@ -6,12 +16,10 @@ function enableColumnResize(tableId) {
   const colgroup = table.querySelector("colgroup");
   if (!colgroup) return;
 
-  const cols = colgroup.querySelectorAll("col");
-  const ths = table.querySelectorAll("thead th");
+  const ths = getVisibleThs(table);
+  const cols = table.querySelectorAll("colgroup col");
 
   ths.forEach((th, index) => {
-    if (index === 0) return;
-
     if (th.querySelector(".col-resizer")) return;
 
     const resizer = document.createElement("div");
@@ -19,7 +27,7 @@ function enableColumnResize(tableId) {
     th.appendChild(resizer);
 
     let startX, startWidth;
-    const targetCol = cols[index - 1]; // ⭐ 核心
+    const targetCol = cols[index];
 
     resizer.addEventListener("mousedown", e => {
       e.preventDefault();
@@ -63,12 +71,13 @@ function initColGroup(tableId) {
   if (!thead) return;
 
   const colgroup = document.createElement("colgroup");
+  const ths = getVisibleThs(table);
 
-  thead.querySelectorAll("th").forEach(th => {
+  ths.forEach((th, i, arr) => {
     const col = document.createElement("col");
-    col.style.width = th.offsetWidth
-      ? th.offsetWidth + "px"
-      : "120px";
+    if (i !== arr.length - 1) {
+      col.style.width = th.offsetWidth + "px";
+    }
     colgroup.appendChild(col);
   });
 
@@ -92,9 +101,11 @@ function restoreColWidths(tableId) {
   const cols = document
     .getElementById(tableId)
     .querySelectorAll("colgroup col");
+  console.log(widths, cols);
 
   widths.forEach((w, i) => {
-    if (cols[i] && w) cols[i].style.width = w;
+    console.log(i, w);
+    if (i !== cols.length - 1 && cols[i] && w) cols[i].style.width = w;
   });
 }
 
@@ -104,7 +115,8 @@ function enableTableSort(tableSelector, sortState) {
   $thead.on("click", "th.sortable", function (e) {
     if (e.target.closest(".col-resizer")) return;
 
-    const key = $(this).data("key");
+    const $th = $(this);
+    const key = $th.data("key");
     if (!key) return;
 
     if (sortState.key !== key) {
@@ -121,9 +133,19 @@ function enableTableSort(tableSelector, sortState) {
       }
     }
 
+    $thead.find("th.sortable")
+      .removeClass("active asc desc");
+
+    if (sortState.key === key && sortState.order) {
+      $th
+        .addClass("active")
+        .addClass(sortState.order);
+    }
+
     updateView();
   });
 }
+
 
 function setPastePlain(tableId) {
   const $tableBody = $(`#${tableId} tbody`);
@@ -135,6 +157,7 @@ function setPastePlain(tableId) {
     selection.deleteFromDocument();
     selection.getRangeAt(0).insertNode(document.createTextNode(text));
     selection.collapseToEnd();
+    this.dispatchEvent(new Event("input", { bubbles: true }));
   });
 }
 
@@ -150,6 +173,19 @@ function disableEnterKey(tableId, fields) {
   });
 }
 
+function rollBackTableEdits(tableId) {
+  const $tableBody = $(`#${tableId} tbody`);
+  $tableBody.on("blur", "[contenteditable][data-type!='string']", function () {
+    const value = getEditorValue(this);
+    if (value === null) {
+        const id = $(this).closest("tr").data("id");
+        const field = $(this).data("field");
+        const original = list.find(b => b.id === id)?.[field];
+        $(this).text(original ?? "");
+    }
+});
+}
+
 function initTable(tableId, sortState, fieldsToDisableEnter=null) {
     if (sortState) {
       enableTableSort('#'+tableId, sortState);
@@ -161,4 +197,12 @@ function initTable(tableId, sortState, fieldsToDisableEnter=null) {
     if (fieldsToDisableEnter) {
         disableEnterKey(tableId, fieldsToDisableEnter)
     }
+    rollBackTableEdits(tableId)
+}
+
+function readTablePatch(el) {
+  return {
+    id: $(el).closest("tr").data("id"),
+    patch: { [$(el).data("field")]: getEditorValue(el) }
+  };
 }
