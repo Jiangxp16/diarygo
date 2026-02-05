@@ -232,7 +232,7 @@ $('#btn-list').click(() => {
 
 $('#diary-table').on('click', '.month-active', function () {
     let id = $(this).data('date'); // yyyymmdd
-    state.date = dateIntToISOStr(id);
+    state.date = intToISOStr(id);
     $('#date-picker').val(state.date);
     updateWeatherAndLocation();
 });
@@ -296,7 +296,7 @@ const updater = createAutoSaver({
 $("#diary-list-table tbody").on("click", "tr", function () {
     let id = $(this).data('id');
     if (!id) return;
-    state.date = dateIntToISOStr(id);
+    state.date = intToISOStr(id);
     $('#date-picker').val(state.date);
     $(this).addClass("table-active").siblings().removeClass("table-active");
 });
