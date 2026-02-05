@@ -2,6 +2,7 @@
 const APP_KEY = 'diarygo_state';
 const VIEW_DAILY = 0;
 const VIEW_MONTHLY = 1;
+const VIEW_LIST = 2;
 const WEEK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const INTEREST_SORTS = ["All", "Movie", "TV", "Comic", "Game", "Book", "Music", "Others"]
 const SAVE_DELAY = 500;
@@ -94,7 +95,10 @@ function getEditorValue(el) {
 }
 
 
-function date2int(dateInput) {
+function dateToInt(dateInput) {
+    if (typeof dateInput === 'number' && Number.isInteger(dateInput)) {
+        return dateInput;
+    }
     let d;
     if (typeof dateInput === 'string') {
         d = new Date(dateInput);
@@ -106,27 +110,33 @@ function date2int(dateInput) {
     return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
 }
 
-function date2str(dateInput) {
-    let d;
-    if (typeof dateInput === 'string') {
-        d = new Date(dateInput);
-    } else if (dateInput instanceof Date) {
-        d = dateInput;
-    } else {
-        d = new Date();
-    }
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}${m}${day}`;
+function intToISOStr(dateInt) {
+    const s = String(dateInt);
+    return `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`;
 }
 
-function str2date(idStr) {
+function strToDate(dateStr) {
     if (!/^\d{8}$/.test(idStr)) return null;
-    const y = parseInt(idStr.substring(0, 4));
-    const m = parseInt(idStr.substring(4, 6)) - 1;
-    const d = parseInt(idStr.substring(6, 8));
+    const y = parseInt(dateStr.substring(0, 4));
+    const m = parseInt(dateStr.substring(4, 6)) - 1;
+    const d = parseInt(dateStr.substring(6, 8));
     return new Date(y, m, d);
+}
+
+function intToDate(dateInt) {
+    return strToDate(dateInt.toString());
+}
+
+function getYearFromYMD(dateInt) {
+    return Math.floor(dateInt / 10000);
+}
+
+function getMonthFromYMD(dateInt) {
+    return Math.floor(dateInt / 100) % 100;
+}
+
+function getDayFromYMD(dateInt) {
+    return dateInt % 100;
 }
 
 function showMsg(message, type = 'danger', delay = 3000, redirect = null) {
@@ -294,11 +304,12 @@ function shallowEqualCommon(a, b) {
 
 function createAutoSaver({ getEntity, readCurrent, save }) {
     const draftCache = new Map();
-    let timer = null;
+    const timers = new Map();
+    //let timer = null;
 
     function update(id) {
         const entity = getEntity(id);
-        const current = readCurrent();
+        const current = readCurrent(id);
 
         if (shallowEqualCommon(entity, current)) {
             draftCache.delete(id);
@@ -306,10 +317,12 @@ function createAutoSaver({ getEntity, readCurrent, save }) {
         }
 
         draftCache.set(id, current);
-
-        if (timer) clearTimeout(timer);
-        timer = setTimeout(() => {
-            timer = null;
+        if (timers.has(id)) {
+            clearTimeout(timers.get(id));
+        }
+        //if (timer) clearTimeout(timer);
+        timers.set(id, setTimeout(() => {
+            timers.delete(id);
             const draft = draftCache.get(id);
             if (!draft) return;
             save(id, draft, () => {
@@ -317,18 +330,15 @@ function createAutoSaver({ getEntity, readCurrent, save }) {
                 draftCache.delete(id);
                 console.log('Saved', id);
             });
-        }, SAVE_DELAY);
+        }, SAVE_DELAY));
     }
 
     return { update };
 }
 
-function createPatchSaver({
-    getEntity,   // id => persisted object
-    save        // (id, patch, done) => void
-}) {
+function createPatchSaver({ getEntity, save }) {
     const draftCache = new Map();
-    let timer = null;
+    const timers = new Map();
 
     function update(id, patch) {
         if (!patch || typeof patch !== 'object') return;
@@ -353,9 +363,9 @@ function createPatchSaver({
 
         draftCache.set(id, draft);
 
-        if (timer) clearTimeout(timer);
-        timer = setTimeout(() => {
-            timer = null;
+        if (timers.has(id)) clearTimeout(timers.get(id));
+        timers.set(id, setTimeout(() => {
+            timers.delete(id);
             const data = draftCache.get(id);
             if (!data) return;
             const snapshot = { ...data };
@@ -365,7 +375,7 @@ function createPatchSaver({
                 draftCache.delete(id);
                 console.log('Saved', id);
             });
-        }, SAVE_DELAY);
+        }, SAVE_DELAY));
     }
 
     return { update };

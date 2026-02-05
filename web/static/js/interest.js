@@ -43,11 +43,11 @@ function renderTable() {
             <td contenteditable data-field="added" data-type="int" class="td-center">${i.added}</td>
             <td contenteditable data-field="name" data-type="string" class="td-left">${i.name}</td>
             <td>
-            <select class="form-select form-select-sm sort-select" data-field="sort" data-type="int">
-                ${INTEREST_SORTS.map((s, idx) => `
-                <option value="${idx}" ${idx === i.sort ? "selected" : ""}>${I18N[s]}</option>
-                `).join("")}
-            </select>
+                <select data-field="sort" data-type="int">
+                    ${INTEREST_SORTS.map((s, idx) => `
+                    <option value="${idx}" ${idx === i.sort ? "selected" : ""}>${I18N[s]}</option>
+                    `).join("")}
+                </select>
             </td>
             <td contenteditable data-field="progress" data-type="string" class="td-center">${i.progress}</td>
             <td contenteditable data-field="publish" data-type="int" class="td-center">${i.publish}</td>

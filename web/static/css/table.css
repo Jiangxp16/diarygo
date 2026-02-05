@@ -6,7 +6,8 @@
   min-width: 0;
   width: 100%;
   max-width: none;
-  padding: 6px;
+  padding: 0;
+  margin: 6px;
 }
 
 .table-container col:last-child {
@@ -41,9 +42,6 @@
   box-sizing: border-box;
   vertical-align: middle;
   padding: 10px;
-}
-
-.table-container th {
   position: relative;
 }
 
@@ -63,19 +61,16 @@
   opacity: 1;
 }
 
-.table-container thead {
-  position: sticky;
-  top: 0;
-  background-color: #f8f9fa;
-  z-index: 2;
-}
-
 .table-container thead th {
   background-color: #f8f9fa;
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
   border-bottom: 1.5px solid #cfd4da;
   border-left: 1px solid #e6e9ec;
   border-right: 1px solid #e6e9ec;
+  position: sticky;
+  top: 0;
+  background-color: #f8f9fa;
+  z-index: 5;
 }
 
 .table-container tbody tr td {
@@ -96,20 +91,23 @@
   vertical-align: middle;
 }
 
-.table-container th.th-center {
+.th-center {
   text-align: center;
   vertical-align: middle;
 }
 
-.table-container th.th-left {
+.th-left {
   text-align: left;
 }
 
-.table-container select.form-select.sort-select {
+.table-container select {
   padding-left: 0.4rem;
   padding-right: 1rem;
   background-position: right 0.25rem center;
-  min-width: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border: none;
 }
 
 th.sortable {
@@ -139,4 +137,8 @@ th.sortable.desc::after {
 
 .table-container tbody tr.table-active {
   box-shadow: inset 3px 0 0 #0d6efd;
+}
+
+.table-container tbody tr.table-active:hover td {
+  background-color: transparent;
 }

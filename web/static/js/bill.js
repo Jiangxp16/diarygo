@@ -32,8 +32,8 @@ function applyState() {
 
 
 function loadBills() {
-  const start = date2int($('#date-start').val());
-  const end = date2int($('#date-end').val());
+  const start = dateToInt($('#date-start').val());
+  const end = dateToInt($('#date-end').val());
 
   API.get(`/api/bill/list?start=${start}&end=${end}`, data => {
     list = data;

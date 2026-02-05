@@ -45,7 +45,6 @@ button {
 
     box-sizing: border-box;
     vertical-align: middle;
-    cursor: pointer;
     user-select: none;
     white-space: nowrap;
 
@@ -55,7 +54,6 @@ button {
         box-shadow .15s ease,
         background-color .15s ease;
 }
-
 
 #btn-import {
     background-color: #0dcaf0;

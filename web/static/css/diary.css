@@ -67,7 +67,6 @@
 
 .month-active {
     background-color: #fff;
-    cursor: pointer;
 }
 
 .month-active:hover {
@@ -148,6 +147,16 @@
 
 #btn-monthly:hover {
     background-color: #bb2d3b;
+}
+
+#btn-list {
+    background-color: #438eff;
+    border-color: #438eff;
+    color: #fff;
+}
+
+#btn-list:hover {
+    background-color: #3585fc;
 }
 
 /* ========= Inputs ========= */

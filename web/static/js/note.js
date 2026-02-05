@@ -79,11 +79,10 @@ const updater = createPatchSaver({
     }
 });
 
-$("#note-table tbody")
-    .on("input", "td[contenteditable]", function () {
-        const { id, patch } = readTablePatch(this);
-        updater.update(id, patch);
-    })
+$("#note-table tbody").on("input", "td[contenteditable]", function () {
+    const { id, patch } = readTablePatch(this);
+    updater.update(id, patch);
+})
 
 $("#btn-add").click(() => {
     API.post('/api/note/add', {}, () => {

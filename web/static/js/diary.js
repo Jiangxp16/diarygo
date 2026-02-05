@@ -3,13 +3,10 @@ let state = loadAppState("diary");
 
 
 function applyState() {
-    if (state.date) {
-        $('#date-picker').val(state.date);
-    } else {
-        let today = new Date().toISOString().split('T')[0];
-        $('#date-picker').val(today);
-        state.date = today;
+    if (!state.date) {
+        state.date = new Date().toISOString().split('T')[0];
     }
+    $('#date-picker').val(state.date);
 }
 
 function loadDiaries() {
@@ -24,31 +21,67 @@ function loadDiaries() {
 
 function updateView() {
     if (state.view === VIEW_DAILY) {
+        $('#input-weather, #input-location, #diary-table').show();
+        $('#diary-list-table').hide();
         updateDailyView();
-    } else {
+    } else if (state.view === VIEW_MONTHLY) {
+        $('#input-weather, #input-location, #diary-table').show();
+        $('#diary-list-table').hide();
         updateMonthlyView();
+    } else if (state.view === VIEW_LIST) {
+        $('#input-weather, #input-location, #diary-table').hide();
+        $('#diary-list-table').show();
+        updateListView();
     }
 }
 
+function updateListView() {
+    let date = new Date(state.date);
+    let year = date.getFullYear();
+    let month = date.getMonth();
+
+    let firstDate = new Date(year, month, 1);
+    let lastDate = new Date(year, month + 1, 0);
+
+    let html = '';
+    let day = new Date(firstDate);
+    while (day <= lastDate) {
+        let id = dateToInt(day);
+        let diary = list.find(d => d.id === id) || { content: "", weather: "", location: ""};
+        html += `
+            <tr data-id="${id}">
+                <td data-field="date" data-type="int" class="td-center">${id}</td>
+                <td contenteditable="true" data-field="weather" data-type="string" class="td-left">${diary.weather}</td>
+                <td contenteditable="true" data-field="location" data-type="string" class="td-left">${diary.location}</td>
+                <td contenteditable="true" data-field="content" data-type="string" class="td-left">${str2contenteditable(diary.content)}</td>
+            </tr>
+        `;
+        day.setDate(day.getDate() + 1);
+    }
+    $('#diary-list-table tbody').html(html);
+    const currentId = dateToInt(state.date);
+    $(`#diary-list-table tbody tr[data-id="${currentId}"]`)
+        .addClass('table-active')
+        .siblings().removeClass('table-active');
+}
+
 function updateWeatherAndLocation() {
-    const diary = list.find(d => d.id === date2int(state.date)) || { content: "", weather: "", location: "" };
+    const diary = list.find(d => d.id === dateToInt(state.date)) || { content: "", weather: "", location: "" };
     $('#input-weather').val(diary.weather);
     $('#input-location').val(diary.location);
 }
 
 function getLunarText(date, withMonth = false) {
     if (typeof solarlunar === 'undefined') {
-        console.error('solarlunar-es 库未正确加载。');
+        console.error('solarlunar-es undefined。');
         return '';
     }
     if (!APP_CONFIG.show_lunar) {
         return '';
     }
-
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
     const day = date.getDate();
-
     try {
         const lunarData = solarlunar.solar2lunar(year, month, day);
         let text = ``;
@@ -74,7 +107,6 @@ function renderDailyHeader(date) {
     let solar = date.toDateString();
     let lunar = getLunarText(date, true);
     let holiday = getHolidayText(date);
-
     let html = `<div class="daily-date-solar">${solar}</div>`;
     if (lunar) {
         html += `<div class="daily-date-lunar">${lunar}</div>`;
@@ -86,14 +118,13 @@ function renderDailyHeader(date) {
 }
 
 function updateDailyView() {
-    const date = new Date(state.date);
-    const diary = list.find(d => d.id === date2int(date)) || { content: "", weather: "", location: "" };
+    const date = new Date($('#date-picker').val());
+    const diary = list.find(d => d.id === dateToInt(date)) || { content: "", weather: "", location: "" };
     $('#diary-table thead tr').html(`<th>${renderDailyHeader(date)}</th>`);
     $('#diary-table tbody').html(`<tr><td class="daily-cell"><div id="te-content"
                   class="daily-editor"
                   contenteditable="true"
                 >${str2contenteditable(diary.content)}</div></td></tr>`);
-
     updateWeatherAndLocation();
 }
 
@@ -111,18 +142,17 @@ function renderCellDate(date) {
     return html;
 }
 function updateMonthlyView() {
-    let date = new Date($('#date-picker').val());
+    const date = new Date($('#date-picker').val());
     updateWeatherAndLocation()
 
-    let year = date.getFullYear();
-    let month = date.getMonth();
+    const year = date.getFullYear();
+    const month = date.getMonth();
 
-    let firstDate = new Date(year, month, 1);
-    let lastDate = new Date(year, month + 1, 0);
+    const firstDate = new Date(year, month, 1);
+    const lastDate = new Date(year, month + 1, 0);
 
-    let firstDayOfWeek = APP_CONFIG.first_day_of_week % 7; // 默认为周一
-    let headers = WEEK_DAYS.slice(firstDayOfWeek - 1)
-        .concat(WEEK_DAYS.slice(0, firstDayOfWeek - 1));
+    const firstDayOfWeek = APP_CONFIG.first_day_of_week % 7;
+    const headers = WEEK_DAYS.slice(firstDayOfWeek - 1).concat(WEEK_DAYS.slice(0, firstDayOfWeek - 1));
     $('#diary-table thead tr').html(headers.map(d => `<th>${I18N[d] || d}</th>`).join(''));
 
     let html = '';
@@ -132,7 +162,7 @@ function updateMonthlyView() {
     for (let r = 0; r < 6; r++) {
         html += '<tr>';
         for (let c = 0; c < 7; c++) {
-            let id = date2int(day);
+            let id = dateToInt(day);
             let diary = list.find(d => d.id === id) || { content: "", weather: "", location: "" };
             let isCurrentMonth = day >= firstDate && day <= lastDate;
             let cellDateHtml = renderCellDate(day);
@@ -152,13 +182,12 @@ function updateMonthlyView() {
         }
         html += '</tr>';
     }
-
     $('#diary-table tbody').html(html);
 }
 
 $('#date-picker').change(function () {
-    let previous = state.date
-    let current = $('#date-picker').val()
+    let previous = state.date;
+    let current = this.value;
     state.date = current;
     if (previous === null || previous.substring(0, 7) !== current.substring(0, 7)) {
         loadDiaries();
@@ -191,22 +220,20 @@ $('#btn-daily').click(() => {
     state.view = VIEW_DAILY;
     updateView();
 });
-
 $('#btn-monthly').click(() => {
     state.view = VIEW_MONTHLY;
+    updateView();
+});
+$('#btn-list').click(() => {
+    state.view = VIEW_LIST;
     updateView();
 });
 
 
 $('#diary-table').on('click', '.month-active', function () {
     let id = $(this).data('date'); // yyyymmdd
-    let y = id.toString().substring(0, 4);
-    let m = id.toString().substring(4, 6);
-    let d = id.toString().substring(6, 8);
-
-    let dateStr = `${y}-${m}-${d}`;
-    $('#date-picker').val(dateStr);
-    state.date = dateStr;
+    state.date = dateIntToISOStr(id);
+    $('#date-picker').val(state.date);
     updateWeatherAndLocation();
 });
 
@@ -219,21 +246,40 @@ function getDiaryByID(id) {
     return diary;
 }
 
-function getCurrentContent() {
+function getCurrentContent(id) {
     let html = '';
     if (state.view === VIEW_DAILY) {
         html = $('#te-content').html();
     } else {
-        const id = date2int(state.date);
         html = $(`td[data-date="${id}"] .cell-content`).html();
     }
     html = contenteditable2str(html)
     return html.trim();
 }
 
-function readCurrentEditor() {
+function readCurrentEditor(id) {
+    if (state.view === VIEW_LIST) {
+        const $tr = $(`#diary-list-table tbody tr[data-id="${id}"]`);
+        if (!$tr.length) return null;
+
+        let data = {};
+
+        $tr.find('[data-field]').each(function () {
+            const field = $(this).data('field');
+            const value = getEditorValue(this);
+            if (value !== null) {
+                data[field] = value;
+            }
+        });
+
+        return {
+            content: data.content || "",
+            weather: data.weather || "",
+            location: data.location || "",
+        };
+    }
     return {
-        content: getCurrentContent(),
+        content: getCurrentContent(id),
         weather: $('#input-weather').val().trim(),
         location: $('#input-location').val().trim(),
     };
@@ -241,25 +287,38 @@ function readCurrentEditor() {
 
 const updater = createAutoSaver({
   getEntity: getDiaryByID,
-  readCurrent: () => readCurrentEditor(),
+  readCurrent: (id) => readCurrentEditor(id),
   save: (id, data, done) => {
     API.post('/api/diary/update', { id, ...data }, done);
   }
 });
 
+$("#diary-list-table tbody").on("click", "tr", function () {
+    let id = $(this).data('id');
+    if (!id) return;
+    state.date = dateIntToISOStr(id);
+    $('#date-picker').val(state.date);
+    $(this).addClass("table-active").siblings().removeClass("table-active");
+});
+
+$('#diary-list-table tbody').on('input', 'td[contenteditable]', function () {
+    const id = $(this).closest('tr').data('id');
+    if (!id) return;
+    updater.update(id);
+});
 
 $('#diary-table tbody').on('input', '[contenteditable]', function () {
-    updater.update(date2int(state.date));
+    updater.update(dateToInt(state.date));
 });
 
 $('#input-weather, #input-location').on('input', function () {
-    updater.update(date2int(state.date));
+    updater.update(dateToInt(state.date));
 });
 
 $('#input-weather, #input-location').on('keydown', function (e) {
     if (e.key === 'Enter') {
         e.preventDefault();
-        updater.update(date2int(state.date));
+        updater.update(dateToInt(state.date));
         this.blur();
     }
 });
@@ -268,5 +327,6 @@ $('#input-weather, #input-location').on('keydown', function (e) {
 applyNavConfig();
 applyState();
 setPastePlain("diary-table")
+initTable("diary-list-table", null, new Set(["weather", "location"]));
 loadDiaries();
 addUnloadListener("diary", state)

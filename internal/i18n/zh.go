@@ -5,6 +5,7 @@ var Zh = map[string]string{
 	"login":                            "登录",
 	"daily":                            "日视图",
 	"monthly":                          "月视图",
+	"list":                             "列表",
 	"import":                           "导入",
 	"export":                           "导出",
 	"bill":                             "账单",
