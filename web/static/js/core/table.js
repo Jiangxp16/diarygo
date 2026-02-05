@@ -101,10 +101,8 @@ function restoreColWidths(tableId) {
   const cols = document
     .getElementById(tableId)
     .querySelectorAll("colgroup col");
-  console.log(widths, cols);
 
   widths.forEach((w, i) => {
-    console.log(i, w);
     if (i !== cols.length - 1 && cols[i] && w) cols[i].style.width = w;
   });
 }

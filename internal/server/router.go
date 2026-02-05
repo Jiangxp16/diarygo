@@ -11,6 +11,7 @@ import (
 	"html/template"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 var (
@@ -180,10 +181,19 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+func isAPIRequest(r *http.Request) bool {
+	return r.Header.Get("X-Requested-With") == "XMLHttpRequest" ||
+		strings.Contains(r.Header.Get("Accept"), "application/json")
+}
+
 func requireLogin(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !checkSession(r) {
-			http.Redirect(w, r, "/", http.StatusSeeOther)
+			if isAPIRequest(r) {
+				http.Error(w, "unauthorized", http.StatusUnauthorized)
+			} else {
+				http.Redirect(w, r, "/", http.StatusSeeOther)
+			}
 			return
 		}
 		next(w, r)

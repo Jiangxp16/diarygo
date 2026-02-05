@@ -14,12 +14,12 @@ window.API = {
             success,
             error: API._handleError
         };
-        
+
         if (data !== null && data !== undefined) {
             ajaxOptions.contentType = 'application/json';
             ajaxOptions.data = JSON.stringify(data);
         }
-        
+
         $.ajax(ajaxOptions);
     },
     delete: function (url, data, success) {
@@ -29,12 +29,12 @@ window.API = {
             success,
             error: API._handleError
         };
-        
+
         if (data !== null && data !== undefined) {
             ajaxOptions.contentType = 'application/json';
             ajaxOptions.data = JSON.stringify(data);
         }
-        
+
         $.ajax(ajaxOptions);
     },
     upload: function (url, formData, success) {
@@ -50,7 +50,7 @@ window.API = {
     },
     _handleError: function (xhr) {
         if (xhr.status === 401) {
-            showErrorAndRedirect('Login expired, redirecting to login page...', 5000, '/login');
+            showErrorAndRedirect('Login expired, redirecting to login page...', 3000, '/login');
         } else {
             showError(xhr.responseText || 'Request failed');
         }

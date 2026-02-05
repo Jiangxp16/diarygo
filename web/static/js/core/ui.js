@@ -165,7 +165,7 @@ function showError(msg, delay = 5000) {
     showMsg(msg, 'danger', delay);
 }
 
-function showErrorAndRedirect(msg, delay = 5000, redirect = "/") {
+function showErrorAndRedirect(msg, delay = 3000, redirect = "/") {
     showMsg(msg, 'danger', delay, redirect);
 }
 
@@ -305,7 +305,6 @@ function shallowEqualCommon(a, b) {
 function createAutoSaver({ getEntity, readCurrent, save }) {
     const draftCache = new Map();
     const timers = new Map();
-    //let timer = null;
 
     function update(id) {
         const entity = getEntity(id);
@@ -320,7 +319,6 @@ function createAutoSaver({ getEntity, readCurrent, save }) {
         if (timers.has(id)) {
             clearTimeout(timers.get(id));
         }
-        //if (timer) clearTimeout(timer);
         timers.set(id, setTimeout(() => {
             timers.delete(id);
             const draft = draftCache.get(id);
