@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"diarygo/internal/config"
@@ -9,6 +10,7 @@ import (
 )
 
 const sessionCookie = "diarygo_session"
+const sessionRedirect = "diarygo_redirect_after_login"
 
 // -------------------- session helper --------------------
 func checkSession(r *http.Request) bool {
@@ -44,5 +46,43 @@ func clearSession(w http.ResponseWriter) {
 		Value:   "",
 		Expires: time.Now().Add(-1 * time.Hour),
 		Path:    "/",
+	})
+}
+
+func shouldRecordRedirect(r *http.Request) bool {
+	if r.Method != http.MethodGet {
+		return false
+	}
+	if strings.HasPrefix(r.URL.Path, "/api/") {
+		return false
+	}
+	if r.URL.Path == "/" {
+		return false
+	}
+	return true
+}
+
+func setRedirectAfterLogin(w http.ResponseWriter, url string) {
+	http.SetCookie(w, &http.Cookie{
+		Name:  sessionRedirect,
+		Value: url,
+		Path:  "/",
+	})
+}
+
+func getRedirectAfterLogin(r *http.Request) string {
+	c, err := r.Cookie(sessionRedirect)
+	if err != nil {
+		return ""
+	}
+	return c.Value
+}
+
+func clearRedirectAfterLogin(w http.ResponseWriter) {
+	http.SetCookie(w, &http.Cookie{
+		Name:   sessionRedirect,
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1,
 	})
 }

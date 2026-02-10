@@ -2,11 +2,12 @@ package config
 
 import (
 	"crypto/md5"
-	"diarygo/internal/bill"
 	"diarygo/internal/db"
-	"diarygo/internal/diary"
-	"diarygo/internal/interest"
-	"diarygo/internal/note"
+	"diarygo/internal/entity/bill"
+	"diarygo/internal/entity/diary"
+	"diarygo/internal/entity/interest"
+	"diarygo/internal/entity/note"
+	"diarygo/internal/entity/sport"
 	"encoding/hex"
 	"errors"
 	"os"
@@ -171,7 +172,6 @@ func (r *Repository) CheckValid(section, key, value string) error {
 	return nil
 }
 
-// Get 获取配置
 func (r *Repository) Get(section, key string) string {
 	def := defaultConfig[section][key]
 	return r.GetWithDefault(section, key, def)
@@ -209,7 +209,6 @@ func (r *Repository) GetInt(section, key string, def int) int {
 	return i
 }
 
-// Set 设置配置
 func (r *Repository) Set(section, key, value string) error {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
@@ -217,7 +216,6 @@ func (r *Repository) Set(section, key, value string) error {
 	return r.cfg.SaveTo(r.filePath)
 }
 
-// Delete 删除配置
 func (r *Repository) Delete(section, key string) error {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
@@ -225,21 +223,18 @@ func (r *Repository) Delete(section, key string) error {
 	return r.cfg.SaveTo(r.filePath)
 }
 
-// -------------------- 密码操作 --------------------
+// -------------------- Password Operation --------------------
 
-// SetPassword 保存密码（MD5 加密）
 func (r *Repository) SetPassword(password string) error {
 	hash := md5.Sum([]byte(password))
 	hashStr := hex.EncodeToString(hash[:])
 	return r.Set("global", "password", hashStr)
 }
 
-// GetPassword 获取 MD5 加密后的密码
 func (r *Repository) GetPassword() string {
 	return r.Get("global", "password")
 }
 
-// CheckPassword 校验明文密码是否正确
 func (r *Repository) CheckPassword(input string) bool {
 	hash := md5.Sum([]byte(input))
 	hashStr := hex.EncodeToString(hash[:])
@@ -270,6 +265,10 @@ func (r *Repository) ChangePassword(d *db.DB, oldPwd, newPwd string) error {
 	if err != nil {
 		return err
 	}
+	sportList, err := sport.NewRepository(d).List()
+	if err != nil {
+		return err
+	}
 
 	db.Key = newPwd
 
@@ -290,6 +289,11 @@ func (r *Repository) ChangePassword(d *db.DB, oldPwd, newPwd string) error {
 	}
 	if len(noteList) > 0 {
 		if err := note.NewRepository(d).UpdateMany(noteList); err != nil {
+			return err
+		}
+	}
+	if len(sportList) > 0 {
+		if err := sport.NewRepository(d).UpdateMany(sportList); err != nil {
 			return err
 		}
 	}

@@ -33,7 +33,7 @@ func confJsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func configPage(w http.ResponseWriter, r *http.Request) {
-	render(w, configTpl, nil)
+	render(w, r, configTpl, nil)
 }
 
 func configBatchAPI(w http.ResponseWriter, r *http.Request) {
