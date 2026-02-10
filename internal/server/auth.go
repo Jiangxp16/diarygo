@@ -1,6 +1,14 @@
 package server
 
 import (
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/base64"
+	"errors"
+	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -12,15 +20,92 @@ import (
 const sessionCookie = "diarygo_session"
 const sessionRedirect = "diarygo_redirect_after_login"
 
+var rawKey = []byte("diarygo-session-key-32-bytes-OK!")
+var rawSessionKey []byte
+var aesSessionKey []byte
+
+func initSessionKey() {
+	cfgKey := config.GetRepository().Get("global", "session_key")
+	if cfgKey != "" {
+		rawSessionKey = []byte(cfgKey)
+		fmt.Println("[session] use session_key from config")
+	} else {
+		rawSessionKey = make([]byte, 32)
+		if _, err := rand.Read(rawSessionKey); err != nil {
+			panic("failed to generate random session key")
+		}
+		fmt.Println("[session] no session_key in config, use random key (session will reset on restart)")
+	}
+
+	sum := sha256.Sum256(rawSessionKey)
+	aesSessionKey = sum[:]
+}
+
+func encryptCookieValue(plaintext string) (string, error) {
+	block, err := aes.NewCipher(aesSessionKey)
+	if err != nil {
+		return "", err
+	}
+
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return "", err
+	}
+
+	nonce := make([]byte, gcm.NonceSize())
+	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+		return "", err
+	}
+
+	ciphertext := gcm.Seal(nonce, nonce, []byte(plaintext), nil)
+	return base64.RawURLEncoding.EncodeToString(ciphertext), nil
+}
+
+func decryptCookieValue(encoded string) (string, error) {
+	data, err := base64.RawURLEncoding.DecodeString(encoded)
+	if err != nil {
+		return "", err
+	}
+
+	block, err := aes.NewCipher(aesSessionKey)
+	if err != nil {
+		return "", err
+	}
+
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return "", err
+	}
+
+	if len(data) < gcm.NonceSize() {
+		return "", errors.New("ciphertext too short")
+	}
+
+	nonce := data[:gcm.NonceSize()]
+	ciphertext := data[gcm.NonceSize():]
+
+	plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
+	if err != nil {
+		return "", err
+	}
+
+	return string(plaintext), nil
+}
+
 // -------------------- session helper --------------------
 func checkSession(r *http.Request) bool {
-	cookie, err := r.Cookie(sessionCookie)
+	c, err := r.Cookie(sessionCookie)
 	if err != nil {
 		return false
 	}
-	ok := config.GetRepository().CheckPassword(cookie.Value)
+
+	password, err := decryptCookieValue(c.Value)
+	if err != nil {
+		return false
+	}
+	ok := config.GetRepository().CheckPassword(password)
 	if ok {
-		db.Key = cookie.Value
+		db.Key = password
 	}
 	return ok
 }
@@ -32,9 +117,13 @@ func setSession(w http.ResponseWriter, password string) {
 	if sessionDuration == 0 {
 		sessionDuration = 600 * time.Second
 	}
+	encry, err := encryptCookieValue(password)
+	if err != nil {
+		return
+	}
 	http.SetCookie(w, &http.Cookie{
 		Name:    sessionCookie,
-		Value:   password,
+		Value:   encry,
 		Expires: time.Now().Add(sessionDuration),
 		Path:    "/",
 	})

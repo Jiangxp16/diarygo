@@ -50,6 +50,7 @@ var defaultConfig = map[string]map[string]string{
 		"show_sport":        "1",
 		"password":          "",
 		"ui_default":        "diary",
+		"session_key":       "",
 	},
 	"style": {
 		"font": "Arial, sans-serif",

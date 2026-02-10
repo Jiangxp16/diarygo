@@ -29,7 +29,7 @@ var (
 	configTpl *template.Template
 )
 
-func RegisterRoutes() {
+func registerRoutes() {
 	DB := db.Get()
 	configTpl = initTemplate("config.html", "web/templates/config.html", true)
 	loginTpl = initTemplate("login.html", "web/templates/login.html", false)

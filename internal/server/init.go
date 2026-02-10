@@ -22,9 +22,10 @@ func InitServer() {
 		defer m.Stop()
 	}
 
-	RegisterRoutes()
+	initSessionKey()
+	registerRoutes()
 
 	port := cfg.Get("global", "port")
-	fmt.Printf("Server started at http://localhost:%s", port)
+	fmt.Printf("Server started at http://localhost:%s\n", port)
 	http.ListenAndServe(":"+port, nil)
 }
