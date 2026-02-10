@@ -226,3 +226,4 @@ initTable("bill-table", sortState, "all");
 applyState();
 loadBills();
 addUnloadListener("bill", state)
+addHeartbeat();

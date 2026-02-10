@@ -98,3 +98,4 @@ $('#passwordForm').on('submit', async function (e) {
 });
 
 applyNavConfig();
+addHeartbeat();

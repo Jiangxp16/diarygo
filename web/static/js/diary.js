@@ -330,3 +330,4 @@ setPastePlain("diary-table")
 initTable("diary-list-table", null, new Set(["weather", "location"]));
 loadDiaries();
 addUnloadListener("diary", state)
+addHeartbeat();

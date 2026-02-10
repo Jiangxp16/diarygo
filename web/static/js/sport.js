@@ -120,4 +120,4 @@ initTable("sport-table", sortState, new Set(["date"]));
 applyState();
 loadNotes();
 addUnloadListener("sport", state)
-
+addHeartbeat();

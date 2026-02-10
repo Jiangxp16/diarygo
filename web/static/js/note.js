@@ -125,3 +125,4 @@ initTable("note-table", sortState, new Set(["begin", "last", "progress", "desire
 applyState();
 loadNotes();
 addUnloadListener("note", state)
+addHeartbeat();

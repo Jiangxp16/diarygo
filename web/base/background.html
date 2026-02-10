@@ -52,11 +52,11 @@
 <script src="/static/js/core/table.js"></script>
 {{ block "extra-scripts" . }}{{ end }}  <!-- 子页面可插入额外 JS -->
 <script>
-    if (window.APP_CONFIG?.logo) {
-        document.getElementById('favicon').href = window.APP_CONFIG.logo;
-    }
-    if (window.APP_CONFIG?.font) {
-        document.body.style.fontFamily = window.APP_CONFIG.font;
-    }
+if (window.APP_CONFIG?.logo) {
+    document.getElementById('favicon').href = window.APP_CONFIG.logo;
+}
+if (window.APP_CONFIG?.font) {
+    document.body.style.fontFamily = window.APP_CONFIG.font;
+}
 </script>
 </html>

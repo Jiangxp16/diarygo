@@ -133,12 +133,16 @@ func (r *BaseRepository[T]) Export(w io.Writer) error {
 	sheet := "Sheet1"
 
 	headers := StructCols(list[0], false)
-	f.SetSheetRow(sheet, "A1", &headers)
+	if err := f.SetSheetRow(sheet, "A1", &headers); err != nil {
+		return err
+	}
 
 	for i, item := range list {
 		row := i + 2
 		data := StructArgs(item, false)
-		f.SetSheetRow(sheet, "A"+strconv.Itoa(row), &data)
+		if err := f.SetSheetRow(sheet, "A"+strconv.Itoa(row), &data); err != nil {
+			return err
+		}
 	}
 
 	return f.Write(w)

@@ -146,3 +146,4 @@ initTable("interest-table", sortState, "all");
 applyState();
 loadInterests();
 addUnloadListener("interest", state)
+addHeartbeat();

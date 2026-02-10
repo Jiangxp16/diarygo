@@ -378,3 +378,13 @@ function createPatchSaver({ getEntity, save }) {
 
     return { update };
 }
+
+function addHeartbeat() {
+    setInterval(() => {
+        fetch('/api/ping').then(res => {
+            if (res.status === 401) {
+                location.href = '/';
+            }
+        });
+    }, 5 * 60 * 1000);
+}

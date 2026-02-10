@@ -56,6 +56,10 @@ func initTemplate(htmlName string, htmlFile string, withBase bool) *template.Tem
 	return tpl
 }
 
+func PingHandler(w http.ResponseWriter, r *http.Request) {
+	jsonOK(w)
+}
+
 type Resource[T any] struct {
 	Name       string
 	Tpl        *template.Template
@@ -269,7 +273,6 @@ func ExportHandler[T any](res Resource[T]) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		jsonOK(w)
 	})
 }
 

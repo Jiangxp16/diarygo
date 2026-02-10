@@ -42,6 +42,7 @@ func RegisterRoutes() {
 	http.HandleFunc("/sport", PageHandler(sportRes))
 
 	// -------------------- REST API --------------------
+	http.HandleFunc("/api/ping", requireLogin(PingHandler))
 	http.HandleFunc("/api/config/batch", requireLogin(configBatchAPI))
 	http.HandleFunc("/api/config/change_password", requireLogin(configChangePasswordAPI))
 
@@ -182,7 +183,8 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func isAPIRequest(r *http.Request) bool {
-	return r.Header.Get("X-Requested-With") == "XMLHttpRequest" ||
+	return strings.HasPrefix(r.URL.Path, "/api/") ||
+		r.Header.Get("X-Requested-With") == "XMLHttpRequest" ||
 		strings.Contains(r.Header.Get("Accept"), "application/json")
 }
 

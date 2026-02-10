@@ -13,19 +13,20 @@ import (
 func confJsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/javascript")
 	cfg := config.GetRepository()
+
 	config := map[string]any{
 		"first_day_of_week": cfg.GetInt("global", "first_day_of_week", 1),
 		"location":          cfg.Get("global", "location"),
 		"language":          cfg.Get("global", "language"),
-		"login_expired":     cfg.GetInt("global", "login_expired", 600),
-		"show_lunar":        cfg.GetBool("global", "show_lunar"),
-		"show_bill":         cfg.GetBool("global", "show_bill"),
-		"show_interest":     cfg.GetBool("global", "show_interest"),
-		"show_note":         cfg.GetBool("global", "show_note"),
-		"show_sport":        cfg.GetBool("global", "show_sport"),
-		"ui_default":        cfg.Get("global", "ui_default"),
-		"logo":              cfg.Get("style", "logo"),
-		"font":              cfg.Get("style", "font"),
+		//"login_expired":     cfg.GetInt("global", "login_expired", 600),
+		"show_lunar":    cfg.GetBool("global", "show_lunar"),
+		"show_bill":     cfg.GetBool("global", "show_bill"),
+		"show_interest": cfg.GetBool("global", "show_interest"),
+		"show_note":     cfg.GetBool("global", "show_note"),
+		"show_sport":    cfg.GetBool("global", "show_sport"),
+		"ui_default":    cfg.Get("global", "ui_default"),
+		"logo":          cfg.Get("style", "logo"),
+		"font":          cfg.Get("style", "font"),
 	}
 	jsonBytes, _ := json.Marshal(config)
 	fmt.Fprintf(w, "window.APP_CONFIG = %s;", jsonBytes)
