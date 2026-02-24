@@ -132,7 +132,6 @@ function updateView() {
   updateTotal();
 }
 
-/* ====== 事件 ====== */
 $('#month-picker').change(() => {
   state.month = $('#month-picker').val()
   if (!state.month) return;
@@ -181,14 +180,20 @@ const updater = createPatchSaver({
   }
 });
 
+function handleBillUpdate(el) {
+  const { id, patch } = readTablePatch(el);
+  updater.update(id, patch);
+}
+
+bindIMEAutoSave({
+    container: "#bill-table tbody",
+    selector: "[contenteditable]",
+    onUpdate: handleBillUpdate,
+});
+
 $("#bill-table tbody")
-  .on("input", "td[contenteditable]", function () {
-    const { id, patch } = readTablePatch(this);
-    updater.update(id, patch);
-  })
   .on("change", ".inout-select", function () {
-    const { id, patch } = readTablePatch(this);
-    updater.update(id, patch);
+    handleBillUpdate(this);
   });
 
 $('#btn-add').click(() => {
@@ -219,7 +224,6 @@ $('#importFile').change(function () {
 $('#btn-export').click(() => {
   window.location.href = `/api/bill/export`;
 });
-
 
 applyNavConfig();
 initTable("bill-table", sortState, "all");

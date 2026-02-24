@@ -73,11 +73,16 @@ const updater = createPatchSaver({
     }
 });
 
-$("#sport-table tbody")
-    .on("input", "td[contenteditable]", function () {
-        const { id, patch } = readTablePatch(this);
-        updater.update(id, patch);
-    })
+function handleSportUpdate(el) {
+  const { id, patch } = readTablePatch(el);
+  updater.update(id, patch);
+}
+
+bindIMEAutoSave({
+    container: "#sport-table tbody",
+    selector: "[contenteditable]",
+    onUpdate: handleSportUpdate,
+});
 
 $("#btn-add").click(() => {
     API.post('/api/sport/add', {}, () => {

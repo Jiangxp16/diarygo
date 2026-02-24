@@ -203,7 +203,6 @@ function applyNavConfig() {
         console.warn('APP_CONFIG not loaded yet');
         return;
     }
-
     if (!APP_CONFIG.show_bill) {
         $('#nav-bill').remove();
     }
@@ -387,4 +386,36 @@ function addHeartbeat() {
             }
         });
     }, 5 * 60 * 1000);
+}
+
+function bindIMEAutoSave({
+    container,
+    selector = null,
+    onUpdate
+}) {
+    const $root = $(container);
+
+    function handleStart() {
+        $(this).data("composing", true);
+    }
+    function handleEnd() {
+        const el = this;
+        $(el).data("composing", false);
+        setTimeout(() => onUpdate(el), 0);
+    }
+    function handleInput() {
+        if ($(this).data("composing")) return;
+        onUpdate(this);
+    }
+    if (selector) {
+        $root
+            .on("compositionstart", selector, handleStart)
+            .on("compositionend", selector, handleEnd)
+            .on("input", selector, handleInput);
+    } else {
+        $root
+            .on("compositionstart", handleStart)
+            .on("compositionend", handleEnd)
+            .on("input", handleInput);
+    }
 }

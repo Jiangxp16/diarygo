@@ -95,14 +95,20 @@ const updater = createPatchSaver({
     }
 });
 
+function handleInterestUpdate(el) {
+  const { id, patch } = readTablePatch(el);
+  updater.update(id, patch);
+}
+
+bindIMEAutoSave({
+    container: "#interest-table tbody",
+    selector: "[contenteditable]",
+    onUpdate: handleInterestUpdate,
+});
+
 $("#interest-table tbody")
-    .on("input", "td[contenteditable]", function () {
-        const { id, patch } = readTablePatch(this);
-        updater.update(id, patch);
-    })
     .on("change", ".inout-select", function () {
-        const { id, patch } = readTablePatch(this);
-        updater.update(id, patch);
+        handleInterestUpdate(this);
     });
 
 $("#btn-add").click(() => {

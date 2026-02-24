@@ -79,10 +79,16 @@ const updater = createPatchSaver({
     }
 });
 
-$("#note-table tbody").on("input", "td[contenteditable]", function () {
-    const { id, patch } = readTablePatch(this);
-    updater.update(id, patch);
-})
+function handleNoteUpdate(el) {
+  const { id, patch } = readTablePatch(el);
+  updater.update(id, patch);
+}
+
+bindIMEAutoSave({
+    container: "#note-table tbody",
+    selector: "[contenteditable]",
+    onUpdate: handleNoteUpdate,
+});
 
 $("#btn-add").click(() => {
     API.post('/api/note/add', {}, () => {
@@ -90,7 +96,7 @@ $("#btn-add").click(() => {
     });
 });
 
-$("#btn-del").click(async function() {
+$("#btn-del").click(async function () {
     if (!selectedId) return;
     const ok = await showConfirm(
         I18N["Delete selected record?"],

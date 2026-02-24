@@ -141,6 +141,7 @@ function renderCellDate(date) {
     }
     return html;
 }
+
 function updateMonthlyView() {
     const date = new Date($('#date-picker').val());
     updateWeatherAndLocation()
@@ -301,24 +302,35 @@ $("#diary-list-table tbody").on("click", "tr", function () {
     $(this).addClass("table-active").siblings().removeClass("table-active");
 });
 
-$('#diary-list-table tbody').on('input', 'td[contenteditable]', function () {
-    const id = $(this).closest('tr').data('id');
+function resolveDiaryId(el) {
+    if (state.view === VIEW_LIST) {
+        const id = $(el).closest('tr').data('id');
+        return id || null;
+    }
+    return dateToInt(state.date);
+}
+
+function handleDiaryUpdate(el) {
+    const id = resolveDiaryId(el);
     if (!id) return;
     updater.update(id);
+}
+
+bindIMEAutoSave({
+    container: "#diary-list-table tbody, #diary-table tbody",
+    selector: "[contenteditable]",
+    onUpdate: handleDiaryUpdate,
 });
 
-$('#diary-table tbody').on('input', '[contenteditable]', function () {
-    updater.update(dateToInt(state.date));
-});
-
-$('#input-weather, #input-location').on('input', function () {
-    updater.update(dateToInt(state.date));
+bindIMEAutoSave({
+    container: "#input-weather, #input-location",
+    onUpdate: handleDiaryUpdate,
 });
 
 $('#input-weather, #input-location').on('keydown', function (e) {
     if (e.key === 'Enter') {
         e.preventDefault();
-        updater.update(dateToInt(state.date));
+        handleDiaryUpdate(this)
         this.blur();
     }
 });
